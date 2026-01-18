@@ -1,5 +1,5 @@
 """
-tabs/lyrics.py - 가사 생성 탭 (Tab 1)
+tabs/lyrics.py - 가사 생성 탭 (Tab 1) - 모바일 최적화 버전
 제목 + 가사 동시 생성 기능 포함
 """
 
@@ -70,56 +70,54 @@ def render(client):
     
     st.divider()
     
-    # ============ 기본 정보 섹션 ============
+    # ============ 기본 정보 섹션 (모바일 최적화) ============
     st.subheader("📝 기본 정보")
     
-    col1, col2 = st.columns(2)
+    topic = st.text_input(
+        "🎯 노래 주제 / 스토리",
+        placeholder="예: 새벽 3시 편의점에서 마주친 전 여자친구",
+        help="무엇이든 가능합니다. 구체적일수록 좋아요!"
+    )
     
-    with col1:
-        topic = st.text_input(
-            "🎯 노래 주제 / 스토리",
-            placeholder="예: 새벽 3시 편의점에서 마주친 전 여자친구",
-            help="무엇이든 가능합니다. 구체적일수록 좋아요!"
+    with st.expander("💡 주제 아이디어 (클릭해서 열기)"):
+        st.markdown("""
+        **진지한 주제:**
+        - 10년 만에 고향에 돌아온 날
+        - 암 투병 중인 어머니에게 보내는 편지
+        - 졸업식 날, 말하지 못한 고백
+        
+        **B급/재미있는 주제:**
+        - 월요일 아침 출근길의 고통
+        - 치킨은 왜 이렇게 맛있는가
+        - 내 방 귀퉁이 먼지와의 대화
+        
+        **판타지/특이한 주제:**
+        - AI가 인간에게 보내는 러브레터
+        - 멸망한 지구에서 마지막 로봇의 독백
+        """)
+    
+    genre = st.selectbox(
+        "🎸 장르 선택",
+        options=GENRE_LIST,
+        help="원하는 장르가 없으면 '직접 입력'을 선택하세요"
+    )
+    
+    custom_genre = ""
+    if genre == "직접 입력 (Custom)":
+        custom_genre = st.text_input(
+            "✍️ 장르 직접 입력",
+            placeholder="예: 1990년대 LA 갱스터 랩, 판소리 퓨전 록",
+            help="어떤 장르든, 퓨전이든 마음대로 입력하세요!"
         )
         
-        with st.expander("💡 주제 아이디어 (클릭해서 열기)"):
+        with st.expander("🔥 퓨전 장르 아이디어"):
             st.markdown("""
-            **진지한 주제:**
-            - 10년 만에 고향에 돌아온 날
-            - 암 투병 중인 어머니에게 보내는 편지
-            - 졸업식 날, 말하지 못한 고백
-            
-            **B급/재미있는 주제:**
-            - 월요일 아침 출근길의 고통
-            - 치킨은 왜 이렇게 맛있는가
-            - 내 방 귀퉁이 먼지와의 대화
-            
-            **판타지/특이한 주제:**
-            - AI가 인간에게 보내는 러브레터
-            - 멸망한 지구에서 마지막 로봇의 독백
+            - **사이버펑크 국악**: 가야금 + 신스웨이브
+            - **트로트 메탈**: 꺾기 창법 + 헤비 리프
+            - **불경 EDM**: 염불 + 베이스 드롭
             """)
     
-    with col2:
-        genre = st.selectbox(
-            "🎸 장르 선택",
-            options=GENRE_LIST,
-            help="원하는 장르가 없으면 '직접 입력'을 선택하세요"
-        )
-        
-        custom_genre = ""
-        if genre == "직접 입력 (Custom)":
-            custom_genre = st.text_input(
-                "✍️ 장르 직접 입력",
-                placeholder="예: 1990년대 LA 갱스터 랩, 판소리 퓨전 록",
-                help="어떤 장르든, 퓨전이든 마음대로 입력하세요!"
-            )
-            
-            with st.expander("🔥 퓨전 장르 아이디어"):
-                st.markdown("""
-                - **사이버펑크 국악**: 가야금 + 신스웨이브
-                - **트로트 메탈**: 꺾기 창법 + 헤비 리프
-                - **불경 EDM**: 염불 + 베이스 드롭
-                """)
+    st.divider()
     
     # ============ 분위기/반전 매력 섹션 ============
     st.subheader("🎭 분위기 & 반전 매력 (Vibe)")
@@ -128,7 +126,6 @@ def render(client):
     selected_vibe_name = st.radio(
         "가사의 톤을 선택하세요",
         options=vibe_options,
-        horizontal=True,
         help="같은 주제도 Vibe에 따라 완전히 다른 가사가 됩니다"
     )
     
@@ -138,21 +135,18 @@ def render(client):
     vibe_colors = {"standard": "🟢", "satire": "🟡", "paradox": "🔵", "madness": "🔴"}
     st.caption(f"{vibe_colors.get(vibe_key, '⚪')} {selected_vibe[2]}")
     
-    # ============ 추가 옵션 섹션 ============
+    st.divider()
+    
+    # ============ 추가 옵션 섹션 (모바일 최적화) ============
     st.subheader("⚙️ 추가 옵션")
     
-    col3, col4, col5 = st.columns(3)
+    language = st.selectbox("🌐 가사 언어", ["한국어", "영어", "한영 혼합", "일본어", "한일 혼합"])
     
-    with col3:
-        language = st.selectbox("🌐 가사 언어", ["한국어", "영어", "한영 혼합", "일본어", "한일 혼합"])
+    era = st.selectbox("📅 시대적 분위기", 
+        ["현대 (2020s)", "2010년대", "2000년대", "1990년대", "1980년대", "미래적", "시대 무관"])
     
-    with col4:
-        era = st.selectbox("📅 시대적 분위기", 
-            ["현대 (2020s)", "2010년대", "2000년대", "1990년대", "1980년대", "미래적", "시대 무관"])
-    
-    with col5:
-        intensity = st.select_slider("🔥 감정 강도", 
-            ["차분하게", "적당히", "격렬하게", "폭발적으로"], value="적당히")
+    intensity = st.select_slider("🔥 감정 강도", 
+        ["차분하게", "적당히", "격렬하게", "폭발적으로"], value="적당히")
     
     keywords = st.text_input(
         "🔑 포함할 키워드 (선택사항)",
@@ -244,10 +238,9 @@ def render(client):
         
         st.subheader("📜 생성된 가사")
         
-        col_meta1, col_meta2, col_meta3 = st.columns(3)
-        col_meta1.markdown(f"**🎯 주제:** {st.session_state.get('lyrics_topic', '-')}")
-        col_meta2.markdown(f"**🎸 장르:** {st.session_state.get('lyrics_genre', '-')}")
-        col_meta3.markdown(f"**🎭 Vibe:** {st.session_state.get('lyrics_vibe', '-')}")
+        st.markdown(f"**🎯 주제:** {st.session_state.get('lyrics_topic', '-')}")
+        st.markdown(f"**🎸 장르:** {st.session_state.get('lyrics_genre', '-')}")
+        st.markdown(f"**🎭 Vibe:** {st.session_state.get('lyrics_vibe', '-')}")
         
         st.divider()
         
@@ -272,7 +265,7 @@ def render(client):
             main_lyrics = lyrics_content
             suno_tags = None
         
-        st.text_area("가사 내용", value=main_lyrics, height=500, label_visibility="collapsed")
+        st.text_area("가사 내용", value=main_lyrics, height=400, label_visibility="collapsed")
         
         char_count = len(main_lyrics.replace(" ", "").replace("\n", ""))
         st.caption(f"📊 총 {char_count}자 (공백 제외)")
@@ -292,14 +285,13 @@ def render(client):
                 st.rerun()
         
         with st.expander("✏️ 가사 직접 수정하기"):
-            edited_lyrics = st.text_area("가사 수정", st.session_state["lyrics"], height=500, key="lyrics_editor")
+            edited_lyrics = st.text_area("가사 수정", st.session_state["lyrics"], height=400, key="lyrics_editor")
             
-            col_btn1, col_btn2 = st.columns(2)
-            if col_btn1.button("💾 수정 저장", use_container_width=True):
+            if st.button("💾 수정 저장", use_container_width=True):
                 st.session_state["lyrics"] = edited_lyrics
                 st.success("저장되었습니다!")
                 st.rerun()
-            if col_btn2.button("🗑️ 초기화", use_container_width=True):
+            if st.button("🗑️ 초기화", use_container_width=True):
                 st.session_state["lyrics"] = ""
                 st.session_state["song_title"] = ""
                 st.rerun()
