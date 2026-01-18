@@ -1,6 +1,6 @@
 """
 tabs/storyboard.py - 스토리보드 생성 탭 (Tab 3)
-한글 UI 매핑 + 이미지 일관성 강제 프롬프트 조립
+한글 UI 매핑 + 이미지 일관성 강제 프롬프트 조립 + 한글 설명 표시
 """
 
 import streamlit as st
@@ -40,16 +40,23 @@ SYSTEM_ROLE = """당신은 세계적인 뮤직비디오 연출가(Director)입�
 
 ## 당신의 핵심 임무
 가사의 기승전결을 분석하여 10개의 영화적 장면(Scene)을 구성하고,
-각 장면에 대해 **[이미지 묘사]**와 **[카메라/움직임 지시]**를 작성합니다.
+각 장면에 대해 **[한글 설명]**, **[이미지 묘사]**, **[카메라/움직임 지시]**를 작성합니다.
 
 ## 출력 형식 (매우 중요! 반드시 준수!)
 
 ### 구분자 규칙:
 - **장면과 장면 사이**: `|||` (파이프 3개)로 구분
+- **한글 설명과 이미지 묘사 사이**: `###` (샵 3개)로 구분
 - **이미지 묘사와 모션 묘사 사이**: `@@@` (골뱅이 3개)로 구분
 
 ### 출력 예시:
-A melancholic girl standing in rain, emotional expression, wet streets @@@ Slow zoom in, rain falling ||| She looks up at sky, hope in eyes @@@ Camera pans upward ||| ...
+빗속에서 슬픈 표정으로 서 있는 소녀 ### A melancholic girl standing in rain, emotional expression, wet streets @@@ Slow zoom in, rain falling ||| 하늘을 올려다보며 희망을 품는 모습 ### She looks up at sky, hope in eyes @@@ Camera pans upward ||| ...
+
+### 한글 설명 작성 규칙:
+1. 해당 장면의 핵심 내용을 한 문장으로 요약
+2. 사용자가 장면을 쉽게 이해할 수 있도록 구체적으로
+3. 20-40자 내외로 간결하게
+4. 가사의 감정과 스토리를 반영
 
 ### 이미지 묘사 작성 규칙:
 1. 캐릭터의 포즈, 표정, 위치를 구체적으로
@@ -74,9 +81,9 @@ A melancholic girl standing in rain, emotional expression, wet streets @@@ Slow 
 ## 절대 규칙
 1. 정확히 10개의 장면을 생성
 2. 각 장면은 `|||`로 구분
-3. 이미지와 모션은 `@@@`로 구분
+3. 한글설명, 이미지, 모션은 각각 `###`, `@@@`로 구분
 4. 가사의 실제 내용과 감정을 반영
-5. 모든 묘사는 **영어**로
+5. 모든 이미지/모션 묘사는 **영어**로
 6. **아트 스타일/화풍은 묘사에 포함하지 말 것!**"""
 
 
@@ -90,18 +97,32 @@ def parse_scenes(gpt_response: str) -> list:
         if not raw_scene:
             continue
         
-        if "@@@" in raw_scene:
-            parts = raw_scene.split("@@@")
+        korean_desc = ""
+        image_prompt = ""
+        motion_prompt = ""
+        
+        # 한글 설명과 나머지 분리
+        if "###" in raw_scene:
+            parts = raw_scene.split("###")
+            korean_desc = parts[0].strip()
+            remaining = parts[1].strip() if len(parts) > 1 else ""
+        else:
+            remaining = raw_scene
+        
+        # 이미지와 모션 분리
+        if "@@@" in remaining:
+            parts = remaining.split("@@@")
             image_prompt = parts[0].strip()
             motion_prompt = parts[1].strip() if len(parts) > 1 else ""
         else:
-            image_prompt = raw_scene
+            image_prompt = remaining
             motion_prompt = ""
         
         if not motion_prompt:
             motion_prompt = "Cinematic slow motion, gentle camera movement, atmospheric lighting"
         
         scenes.append({
+            "korean_desc": korean_desc,
             "image_prompt": image_prompt,
             "motion_prompt": motion_prompt
         })
@@ -121,8 +142,9 @@ def render(client):
     
     st.success("""
     ✨ **이 탭에서 생성되는 것들:**
-    1. **🖼️ Midjourney 프롬프트** - `--cref`로 캐릭터 일관성 유지
-    2. **🎥 Motion 프롬프트** - Kling, Runway, Pika용
+    1. **📖 한글 장면 설명** - 각 장면의 내용을 쉽게 파악
+    2. **🖼️ Midjourney 프롬프트** - `--cref`로 캐릭터 일관성 유지
+    3. **🎥 Motion 프롬프트** - Kling, Runway, Pika용
     """)
     
     st.divider()
@@ -212,13 +234,14 @@ def render(client):
 ## 출력 규칙 (반드시 준수!)
 1. 정확히 10개의 장면을 생성하세요.
 2. 장면과 장면 사이는 `|||`로 구분하세요.
-3. 각 장면 내에서 이미지 묘사와 모션 묘사는 `@@@`로 구분하세요.
+3. 각 장면은 다음 형식으로 작성하세요:
+   [한글 설명] ### [영어 이미지 묘사] @@@ [영어 모션 묘사]
 4. **아트 스타일은 묘사에 포함하지 마세요** (시스템이 자동으로 추가합니다)
 5. 가사의 실제 내용, 감정, 스토리를 반영하여 시각화하세요.
 6. 설명 없이 프롬프트만 출력하세요.
 
 ## 출력 형식
-[이미지묘사1] @@@ [모션묘사1] ||| [이미지묘사2] @@@ [모션묘사2] ||| ... (10개)
+[한글설명1] ### [이미지묘사1] @@@ [모션묘사1] ||| [한글설명2] ### [이미지묘사2] @@@ [모션묘사2] ||| ... (10개)
 
 지금 바로 10개 장면의 프롬프트를 생성하세요!"""
 
@@ -276,6 +299,10 @@ def render(client):
         for i, scene in enumerate(scenes[:10], 1):
             with st.expander(f"🎬 Scene {i}", expanded=(i <= 3)):
                 
+                # ★ 한글 설명 먼저 표시
+                if scene.get('korean_desc'):
+                    st.info(f"📖 **장면 설명:** {scene['korean_desc']}")
+                
                 # ★★★ 프롬프트 조립 공식 (핵심!) ★★★
                 # 포맷: /imagine prompt: {스타일}, {장면묘사} --cref {URL} --ar 16:9
                 midjourney_prompt = f"/imagine prompt: {art_style_en}, {scene['image_prompt']} --cref {master_url} --ar 16:9"
@@ -288,6 +315,7 @@ def render(client):
                 
                 final_prompts.append({
                     "scene": i,
+                    "korean_desc": scene.get('korean_desc', ''),
                     "midjourney": midjourney_prompt,
                     "motion": scene['motion_prompt'],
                     "image_desc": scene['image_prompt']
@@ -310,7 +338,7 @@ def render(client):
         with tab_mj:
             st.markdown("**Midjourney Discord에 순서대로 붙여넣기:**")
             all_mj_prompts = "\n\n".join([
-                f"# Scene {p['scene']}\n{p['midjourney']}"
+                f"# Scene {p['scene']}: {p['korean_desc']}\n{p['midjourney']}"
                 for p in final_prompts
             ])
             st.text_area("MJ 프롬프트", value=all_mj_prompts, height=400, label_visibility="collapsed")
@@ -318,15 +346,16 @@ def render(client):
         with tab_motion:
             st.markdown("**Kling/Runway/Pika에 사용할 모션 프롬프트:**")
             all_motion_prompts = "\n\n".join([
-                f"# Scene {p['scene']}\n{p['motion']}"
+                f"# Scene {p['scene']}: {p['korean_desc']}\n{p['motion']}"
                 for p in final_prompts
             ])
             st.text_area("Motion 프롬프트", value=all_motion_prompts, height=400, label_visibility="collapsed")
         
         with tab_all:
-            st.markdown("**전체 데이터 (이미지 + 모션):**")
+            st.markdown("**전체 데이터 (한글 설명 + 이미지 + 모션):**")
             all_prompts = "\n\n".join([
                 f"{'='*50}\n🎬 SCENE {p['scene']}\n{'='*50}\n\n"
+                f"[한글 설명]\n{p['korean_desc']}\n\n"
                 f"[Midjourney]\n{p['midjourney']}\n\n"
                 f"[Motion]\n{p['motion']}"
                 for p in final_prompts
