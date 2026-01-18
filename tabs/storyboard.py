@@ -160,61 +160,63 @@ def render(client):
     
     st.divider()
     
-    # ============ 입력 영역 ============
-    col1, col2 = st.columns([2, 1])
+    # ============ 입력 영역 (모바일 반응형) ============
+    st.subheader("📝 가사 입력")
+    default_lyrics = st.session_state.get("lyrics", "")
     
-    with col1:
-        st.subheader("📝 가사 입력")
-        default_lyrics = st.session_state.get("lyrics", "")
-        
-        lyrics_input = st.text_area(
-            "뮤직비디오에 사용할 가사",
-            value=default_lyrics,
-            height=300,
-            placeholder="[Verse 1]\n여기에 가사를 입력하세요...",
-            help="가사를 기반으로 10개의 장면이 생성됩니다"
-        )
-        
-        if default_lyrics:
-            st.caption("💡 Tab 1에서 생성한 가사가 자동으로 불러와졌습니다.")
+    lyrics_input = st.text_area(
+        "뮤직비디오에 사용할 가사",
+        value=default_lyrics,
+        height=250,
+        placeholder="[Verse 1]\n여기에 가사를 입력하세요...",
+        help="가사를 기반으로 10개의 장면이 생성됩니다"
+    )
     
-    with col2:
-        st.subheader("🔗 마스터 이미지 URL")
-        default_url = st.session_state.get("master_image_url", "")
-        
-        master_url = st.text_input(
-            "캐릭터 참조용 이미지 URL",
-            value=default_url,
-            placeholder="https://cdn.midjourney.com/...",
-            help="Tab 2에서 Midjourney로 생성한 캐릭터 이미지 URL"
-        )
-        
-        if default_url:
-            st.caption("💡 Tab 2에서 저장한 URL이 불러와졌습니다.")
-        else:
-            st.warning("⚠️ 마스터 이미지 URL이 없습니다.")
-        
-        # ============ 아트 스타일 (한글 매핑) ============
-        st.subheader("🎨 아트 스타일")
-        
-        art_style_kr = st.selectbox(
-            "일관된 아트 스타일 선택",
-            options=ART_STYLE_OPTIONS,
-            help="모든 10개 장면에 동일하게 적용됩니다"
-        )
-        
-        # 선택된 영어값 미리보기
-        st.caption(f"🔤 영어값: `{ART_STYLE_MAP[art_style_kr][:35]}...`")
-        
-        # ============ 영상 분위기 (한글 매핑) ============
-        st.subheader("🎥 영상 분위기")
-        
-        video_mood_kr = st.selectbox(
-            "전체 영상 톤",
-            options=VIDEO_MOOD_OPTIONS
-        )
-        
-        st.caption(f"🔤 영어값: `{VIDEO_MOOD_MAP[video_mood_kr]}`")
+    if default_lyrics:
+        st.caption("💡 Tab 1에서 생성한 가사가 자동으로 불러와졌습니다.")
+    
+    st.divider()
+    
+    st.subheader("🔗 마스터 이미지 URL")
+    default_url = st.session_state.get("master_image_url", "")
+    
+    master_url = st.text_input(
+        "캐릭터 참조용 이미지 URL",
+        value=default_url,
+        placeholder="https://cdn.midjourney.com/...",
+        help="Tab 2에서 Midjourney로 생성한 캐릭터 이미지 URL"
+    )
+    
+    if default_url:
+        st.caption("💡 Tab 2에서 저장한 URL이 불러와졌습니다.")
+    else:
+        st.warning("⚠️ 마스터 이미지 URL이 없습니다.")
+    
+    st.divider()
+    
+    # ============ 아트 스타일 (한글 매핑) ============
+    st.subheader("🎨 아트 스타일")
+    
+    art_style_kr = st.selectbox(
+        "일관된 아트 스타일 선택",
+        options=ART_STYLE_OPTIONS,
+        help="모든 10개 장면에 동일하게 적용됩니다"
+    )
+    
+    # 선택된 영어값 미리보기
+    st.caption(f"🔤 영어값: `{ART_STYLE_MAP[art_style_kr][:35]}...`")
+    
+    st.divider()
+    
+    # ============ 영상 분위기 (한글 매핑) ============
+    st.subheader("🎥 영상 분위기")
+    
+    video_mood_kr = st.selectbox(
+        "전체 영상 톤",
+        options=VIDEO_MOOD_OPTIONS
+    )
+    
+    st.caption(f"🔤 영어값: `{VIDEO_MOOD_MAP[video_mood_kr]}`")
     
     st.divider()
     
