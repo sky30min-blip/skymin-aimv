@@ -55,7 +55,7 @@ SYSTEM_ROLE = """당신은 세계적인 뮤직비디오 연출가(Director)입�
 ### 한글 설명 작성 규칙:
 1. 해당 장면의 핵심 내용을 한 문장으로 요약
 2. 사용자가 장면을 쉽게 이해할 수 있도록 구체적으로
-3. 20-40자 내외로 간결하게
+3. 20-30자 내외로 간결하게
 4. 가사의 감정과 스토리를 반영
 
 ### 이미지 묘사 작성 규칙:
@@ -108,6 +108,7 @@ def parse_scenes(gpt_response: str) -> list:
             remaining = parts[1].strip() if len(parts) > 1 else ""
         else:
             remaining = raw_scene
+            korean_desc = "장면 설명"
         
         # 이미지와 모션 분리
         if "@@@" in remaining:
@@ -142,9 +143,9 @@ def render(client):
     
     st.success("""
     ✨ **이 탭에서 생성되는 것들:**
-    1. **📖 한글 장면 설명** - 각 장면의 내용을 쉽게 파악
-    2. **🖼️ Midjourney 프롬프트** - `--cref`로 캐릭터 일관성 유지
-    3. **🎥 Motion 프롬프트** - Kling, Runway, Pika용
+    1. **🖼️ Midjourney 프롬프트** - `--cref`로 캐릭터 일관성 유지
+    2. **🎥 Motion 프롬프트** - Kling, Runway, Pika용
+    3. **📖 한글 장면 설명** - 각 장면의 내용을 쉽게 파악
     """)
     
     st.divider()
@@ -231,19 +232,28 @@ def render(client):
 ## 스타일 정보
 - 영상 분위기: {video_mood_en}
 
-## 출력 규칙 (반드시 준수!)
-1. 정확히 10개의 장면을 생성하세요.
-2. 장면과 장면 사이는 `|||`로 구분하세요.
-3. 각 장면은 다음 형식으로 작성하세요:
-   [한글 설명] ### [영어 이미지 묘사] @@@ [영어 모션 묘사]
-4. **아트 스타일은 묘사에 포함하지 마세요** (시스템이 자동으로 추가합니다)
-5. 가사의 실제 내용, 감정, 스토리를 반영하여 시각화하세요.
-6. 설명 없이 프롬프트만 출력하세요.
+## ⚠️ 매우 중요한 출력 형식 ⚠️
 
-## 출력 형식
-[한글설명1] ### [이미지묘사1] @@@ [모션묘사1] ||| [한글설명2] ### [이미지묘사2] @@@ [모션묘사2] ||| ... (10개)
+각 장면은 **반드시** 다음 구조로 작성하세요:
+1. 한글 설명 (20-40자) ← 절대 생략 금지!
+2. ### (구분자)
+3. 영어 이미지 묘사
+4. @@@ (구분자)  
+5. 영어 모션 묘사
 
-지금 바로 10개 장면의 프롬프트를 생성하세요!"""
+장면 사이는 ||| 로 구분합니다.
+
+## 출력 예시 (반드시 이 형식을 따라주세요!)
+
+어두운 방에서 혼란스러워하는 남자 ### A man standing in a dark room, surrounded by glowing symbols @@@ Slow zoom in, symbols flickering ||| 불타는 동전을 들고 절망하는 모습 ### Hands holding a melting coin in fiery inferno @@@ Camera pulls back ||| ...
+
+⚠️ 주의사항:
+- 한글 설명은 **절대 생략하지 마세요**
+- 각 장면 앞에 **반드시 한글 설명 + ###** 이 있어야 합니다
+- 아트 스타일은 묘사에 포함하지 마세요
+- 다른 설명 없이 위 형식으로만 출력하세요
+
+지금 바로 정확히 10개 장면을 위 형식으로 생성해주세요!"""
 
         with st.spinner("🎬 스토리보드를 기획하고 있습니다... (약 30초~1분)"):
             try:
@@ -299,7 +309,7 @@ def render(client):
         for i, scene in enumerate(scenes[:10], 1):
             with st.expander(f"🎬 Scene {i}", expanded=(i <= 3)):
                 
-                # ★ 한글 설명 먼저 표시
+                # ★ 한글 설명 먼저 표시 (핵심 수정 사항!)
                 if scene.get('korean_desc'):
                     st.info(f"📖 **장면 설명:** {scene['korean_desc']}")
                 
@@ -352,7 +362,7 @@ def render(client):
             st.text_area("Motion 프롬프트", value=all_motion_prompts, height=400, label_visibility="collapsed")
         
         with tab_all:
-            st.markdown("**전체 데이터 (한글 설명 + 이미지 + 모션):**")
+            st.markdown("**전체 데이터 (한글설명 + 이미지 + 모션):**")
             all_prompts = "\n\n".join([
                 f"{'='*50}\n🎬 SCENE {p['scene']}\n{'='*50}\n\n"
                 f"[한글 설명]\n{p['korean_desc']}\n\n"
