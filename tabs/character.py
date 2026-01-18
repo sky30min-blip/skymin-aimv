@@ -1,5 +1,5 @@
 """
-tabs/character.py - 캐릭터 생성 탭 (Tab 2)
+tabs/character.py - 캐릭터 생성 탭 (Tab 2) - 모바일 최적화 버전
 한글 UI 매핑 + 마스터 투샷 전략
 """
 
@@ -101,7 +101,7 @@ def render(client):
     
     st.divider()
     
-    # ============ 캐릭터 정보 입력 ============
+    # ============ 캐릭터 정보 입력 (모바일 최적화) ============
     st.subheader("🎭 캐릭터 정보 입력")
     
     main_subject = st.text_input(
@@ -120,7 +120,7 @@ def render(client):
     details = st.text_area(
         "📝 세부 특징",
         placeholder="예: 소녀는 은발 단발에 LED 고글을 썼고, 검은 가죽 재킷을 입었다...",
-        height=150,
+        height=120,
         help="캐릭터의 외모, 의상, 포즈, 관계성 등을 구체적으로 적어주세요"
     )
     
@@ -134,48 +134,42 @@ def render(client):
         - 표정/포즈: 미소 짓는, 정면을 바라보는
         """)
     
+    st.divider()
+    
     # ============ 아트 스타일 (한글 매핑) ============
     st.subheader("🖼️ 아트 스타일")
     
-    col1, col2 = st.columns([1, 1])
+    art_style_kr = st.selectbox(
+        "화풍 선택",
+        options=ART_STYLE_OPTIONS,
+        help="원하는 아트 스타일을 선택하세요"
+    )
     
-    with col1:
-        art_style_kr = st.selectbox(
-            "화풍 선택",
-            options=ART_STYLE_OPTIONS,
-            help="원하는 아트 스타일을 선택하세요"
+    custom_style = ""
+    if art_style_kr == "직접 입력":
+        custom_style = st.text_input(
+            "✍️ 화풍 직접 입력 (영어 권장)",
+            placeholder="예: Moebius comic style, detailed linework",
+            help="Midjourney에서 사용할 영어 스타일을 입력하세요"
         )
-    
-    with col2:
-        custom_style = ""
-        if art_style_kr == "직접 입력":
-            custom_style = st.text_input(
-                "✍️ 화풍 직접 입력 (영어 권장)",
-                placeholder="예: Moebius comic style, detailed linework",
-                help="Midjourney에서 사용할 영어 스타일을 입력하세요"
-            )
-        else:
-            # 선택된 스타일의 영어값 미리보기
-            if art_style_kr != "선택해주세요":
-                st.caption(f"🔤 **영어값:** `{ART_STYLE_MAP[art_style_kr][:40]}...`")
+    else:
+        # 선택된 스타일의 영어값 미리보기
+        if art_style_kr != "선택해주세요":
+            st.caption(f"🔤 **영어값:** `{ART_STYLE_MAP[art_style_kr][:40]}...`")
     
     # ============ 추가 옵션 (한글 매핑) ============
     with st.expander("⚙️ 추가 옵션"):
-        col3, col4 = st.columns(2)
+        lighting_kr = st.selectbox(
+            "조명 분위기",
+            options=LIGHTING_OPTIONS
+        )
+        st.caption(f"🔤 `{LIGHTING_MAP[lighting_kr][:30]}...`")
         
-        with col3:
-            lighting_kr = st.selectbox(
-                "조명 분위기",
-                options=LIGHTING_OPTIONS
-            )
-            st.caption(f"🔤 `{LIGHTING_MAP[lighting_kr][:30]}...`")
-        
-        with col4:
-            background_kr = st.selectbox(
-                "배경 스타일",
-                options=BACKGROUND_OPTIONS
-            )
-            st.caption(f"🔤 `{BACKGROUND_MAP[background_kr][:30]}...`")
+        background_kr = st.selectbox(
+            "배경 스타일",
+            options=BACKGROUND_OPTIONS
+        )
+        st.caption(f"🔤 `{BACKGROUND_MAP[background_kr][:30]}...`")
     
     st.divider()
     
@@ -249,11 +243,8 @@ def render(client):
     if "character_prompt" in st.session_state and st.session_state["character_prompt"]:
         st.subheader("🖼️ 생성된 Midjourney 프롬프트")
         
-        col_meta1, col_meta2 = st.columns(2)
-        with col_meta1:
-            st.caption(f"🌟 주인공: {st.session_state.get('character_subject', '-')}")
-        with col_meta2:
-            st.caption(f"🎨 화풍: {st.session_state.get('character_style_kr', st.session_state.get('character_style', '-'))}")
+        st.caption(f"🌟 주인공: {st.session_state.get('character_subject', '-')}")
+        st.caption(f"🎨 화풍: {st.session_state.get('character_style_kr', st.session_state.get('character_style', '-'))}")
         
         st.markdown(st.session_state["character_prompt"])
         
@@ -288,25 +279,21 @@ def render(client):
             help="Midjourney에서 Upscale 후 'Open in Browser'로 얻은 URL"
         )
         
-        col_url1, col_url2 = st.columns(2)
-        
-        with col_url1:
-            if st.button("💾 URL 저장", type="primary", use_container_width=True):
-                if master_url:
-                    if master_url.startswith("http"):
-                        st.session_state["master_image_url"] = master_url
-                        st.success("✅ 마스터 이미지 URL이 저장되었습니다!")
-                        st.info("👉 이제 **Tab 3 (스토리보드)**로 이동하세요!")
-                    else:
-                        st.warning("유효한 URL인지 확인해주세요.")
+        if st.button("💾 URL 저장", type="primary", use_container_width=True):
+            if master_url:
+                if master_url.startswith("http"):
+                    st.session_state["master_image_url"] = master_url
+                    st.success("✅ 마스터 이미지 URL이 저장되었습니다!")
+                    st.info("👉 이제 **Tab 3 (스토리보드)**로 이동하세요!")
                 else:
-                    st.error("URL을 입력해주세요.")
+                    st.warning("유효한 URL인지 확인해주세요.")
+            else:
+                st.error("URL을 입력해주세요.")
         
-        with col_url2:
-            if st.session_state.get("master_image_url"):
-                if st.button("🗑️ URL 초기화", use_container_width=True):
-                    st.session_state["master_image_url"] = ""
-                    st.rerun()
+        if st.session_state.get("master_image_url"):
+            if st.button("🗑️ URL 초기화", use_container_width=True):
+                st.session_state["master_image_url"] = ""
+                st.rerun()
         
         if st.session_state.get("master_image_url"):
             st.success(f"✅ 저장된 URL: `{st.session_state['master_image_url'][:50]}...`")
