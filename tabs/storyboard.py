@@ -18,7 +18,7 @@ ART_STYLE_MAP = {
     "한국 웹툰 (깔끔하고 감성적)": "Korean webtoon style, clean lines, emotional, soft shading",
     "수채화 (부드럽고 몽환적)": "Watercolor illustration, soft edges, dreamy atmosphere, artistic",
     "다크 판타지 (어둡고 신비로운)": "Dark fantasy style, dramatic lighting, mysterious, gothic",
-    "90년대 레트로 애니 (복고풍 감성)": "Retro 90s anime style, nostalgic, cel shading, vibrant colors"
+    "90년대 레트로 애니 (복고풍 감성)": "Retro 90s anime style, nostalgic, cel shading, vibrant colors, City Pop aesthetic, Lo-fi vibe, purple and blue neon lighting, dreamy atmosphere, vintage"
 }
 
 VIDEO_MOOD_MAP = {
@@ -58,12 +58,39 @@ SYSTEM_ROLE = """당신은 세계적인 뮤직비디오 연출가(Director)입�
 3. 20-30자 내외로 간결하게
 4. 가사의 감정과 스토리를 반영
 
-### 이미지 묘사 작성 규칙:
-1. 캐릭터의 포즈, 표정, 위치를 구체적으로
-2. 배경과 환경을 상세히 묘사
-3. 조명, 색감, 분위기를 포함
-4. **영어로 작성** (Midjourney 최적화)
-5. **아트 스타일은 포함하지 마세요** (시스템이 자동으로 추가합니다)
+### 이미지 묘사 작성 규칙 (Midjourney 최적화):
+**⚠️ 추상적 표현 금지! 구체적 시각 정보만 사용!**
+
+#### 필수 포함 요소 (Subject-Environment-Lighting-Composition):
+
+1. **Subject (주체)**: 캐릭터의 외형, 옷차림, 자세, 표정
+   - ❌ 나쁜 예: "슬픈 소녀"
+   - ✅ 좋은 예: "A girl in white dress, tear-stained cheeks, hands covering face, slouched posture"
+
+2. **Environment (환경)**: 장소의 구체적 디테일, 날씨, 계절감, 시간대
+   - ❌ 나쁜 예: "도시 배경"
+   - ✅ 좋은 예: "Rain-soaked city street at midnight, neon signs reflecting on wet pavement, empty bus stop"
+
+3. **Lighting & Color (조명과 색감)**: 빛의 방향, 색온도, 그림자 강도
+   - ❌ 나쁜 예: "따뜻한 조명"
+   - ✅ 좋은 예: "Golden hour sunlight filtering through curtains, warm orange glow, soft shadows"
+   - ❌ 나쁜 예: "네온 조명"
+   - ✅ 좋은 예: "Neon purple and cyan lights, high contrast, vibrant color bleeding, cinematic glow"
+
+4. **Composition (구도)**: 카메라 각도와 렌즈 느낌
+   - 예: "Close-up shot", "Wide angle view", "Low angle looking up", "Cinematic depth of field"
+
+5. **가사 연출 지시어 반영** (매우 중요!):
+   - 가사에 `(Piano intro)`가 있으면 → "grand piano with keys visible, spotlight on piano"
+   - 가사에 `(Guitar solo)`가 있으면 → "electric guitar glowing in neon light, strings vibrating"
+   - 가사에 `(Build up)`이 있으면 → "dynamic composition, dramatic lighting, tension in posture"
+   - 가사에 `(Emotional cry)`가 있으면 → "intense facial expression, tears streaming, dramatic close-up"
+   - 가사에 `(Fade out)`이 있으면 → "soft focus, dimming lights, peaceful atmosphere"
+
+#### 주의사항:
+- **영어로 작성** (Midjourney 최적화)
+- **아트 스타일은 포함하지 마세요** (시스템이 자동으로 추가합니다)
+- **한-영 직역 금지**: Midjourney가 이해하기 쉬운 구체적 명사와 형용사 조합으로 변환
 
 ### 모션 묘사 작성 규칙:
 1. 카메라 움직임 (zoom in/out, pan, tilt, dolly)
@@ -87,14 +114,16 @@ SYSTEM_ROLE = """당신은 세계적인 뮤직비디오 연출가(Director)입�
 6. **아트 스타일/화풍은 묘사에 포함하지 말 것!**
 7. **한글 설명을 절대 생략하지 말 것!**
 
-## 올바른 출력 예시 (반드시 참고!)
+## 올바른 출력 예시 (구체적 묘사!)
 
-빗속에서 슬픈 표정으로 서 있는 소녀 ### A melancholic girl standing in rain, emotional expression, wet streets @@@ Slow zoom in, rain falling ||| 하늘을 올려다보며 희망을 품는 모습 ### She looks up at sky, hope in eyes @@@ Camera pans upward ||| 손을 뻗어 빗방울을 받는 장면 ### Hand reaching out to catch raindrops, gentle gesture @@@ Close-up of hand, soft focus
+빗속에서 슬픈 표정으로 서 있는 소녀 ### A melancholic girl in soaked white dress standing under flickering streetlight, tear-stained cheeks glistening, hands loosely hanging, wet streets reflecting neon signs in purple and blue, rain creating ripples in puddles @@@ Slow zoom in from medium shot to close-up, rain falling diagonally across frame, shallow depth of field on girl's face ||| 하늘을 올려다보며 희망을 품는 모습 ### She tilts head upward gazing at dark stormy clouds, hopeful expression with slight smile, single ray of golden sunlight breaking through clouds, dramatic sky composition, wind blowing her hair @@@ Camera pans upward smoothly following her gaze, lens flare effect from sunlight, birds flying in background ||| 손을 뻗어 빗방울을 받는 장면 ### Extreme close-up of delicate hand reaching out with palm open, individual raindrops catching ambient light and creating sparkles, blurred background of city lights in bokeh, gentle graceful gesture @@@ Macro shot focusing on hand, rain drops in slow motion, soft focus transition from hand to background
 
 ## 잘못된 예시 (이렇게 하지 마세요!)
-❌ A melancholic girl standing in rain @@@ Slow zoom in
-❌ 한글설명 없이 영어만 나열
-❌ ### 구분자 없이 바로 영어 시작"""
+❌ A melancholic girl @@@ Slow zoom in (너무 단순, 환경/조명 없음)
+❌ 따뜻한 분위기의 소녀 ### warm atmosphere girl (추상적, 비영어, 구체성 없음)
+❌ 아름다운 장면 ### beautiful scene with emotional feeling (추상적 형용사만 나열)
+❌ ### 구분자 없이 바로 영어 시작 (형식 위반)
+❌ 한글설명 없이 영어만 나열 (한글 설명 필수)"""
 
 
 def parse_scenes(gpt_response: str) -> list:
