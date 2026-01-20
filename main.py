@@ -21,7 +21,7 @@ from utils import (
     import_project_from_json, 
     get_project_info_from_json
 )
-from tabs import lyrics, character, storyboard
+from tabs import theme_expander, lyrics, character, storyboard
 
 
 def init_session_state():
@@ -73,7 +73,7 @@ def render_sidebar(client):
         
         st.divider()
         
-        # ============ 프로젝트 관리 섹션 (새로 추가!) ============
+        # ============ 프로젝트 관리 섹션 ============
         st.subheader("📂 프로젝트 관리")
         
         # 저장 버튼
@@ -140,7 +140,7 @@ def render_sidebar(client):
             else:
                 st.markdown(f"⬜ {item}")
         
-        # 현재 곡 제목 표시 (새로 추가!)
+        # 현재 곡 제목 표시
         if st.session_state.get("song_title"):
             st.divider()
             st.markdown(f"🎵 **현재 곡:** {st.session_state['song_title']}")
@@ -150,9 +150,10 @@ def render_sidebar(client):
         # 사용 안내
         st.subheader("📖 사용 방법")
         st.markdown("""
-        1. **Tab 1**: 노래 주제로 가사 생성
-        2. **Tab 2**: 캐릭터 프롬프트 생성 → Midjourney에서 실행
-        3. **Tab 3**: 가사 + 마스터 이미지 URL로 10개 장면 프롬프트 생성
+        1. **Tab 1-A**: 주제 확장 (선택)
+        2. **Tab 1-B**: 가사 생성
+        3. **Tab 2**: 캐릭터 프롬프트
+        4. **Tab 3**: 스토리보드 (20개 장면)
         """)
         
         st.divider()
@@ -183,7 +184,7 @@ def main():
     # 메인 헤더
     st.title("🎬 AI 뮤직비디오 제작 올인원 툴")
     
-    # 현재 곡 제목 표시 (새로 추가!)
+    # 현재 곡 제목 표시
     if st.session_state.get("song_title"):
         st.markdown(f"### 🎵 *{st.session_state['song_title']}*")
     
@@ -194,15 +195,19 @@ def main():
     
     st.divider()
     
-    # 탭 생성
-    tab1, tab2, tab3 = st.tabs([
-        "🎵 Step 1: 가사 생성",
+    # 탭 생성 (4개로 확장)
+    tab1a, tab1b, tab2, tab3 = st.tabs([
+        "💡 Step 1-A: 주제 확장",
+        "🎵 Step 1-B: 가사 생성",
         "🎨 Step 2: 캐릭터 생성",
         "🎬 Step 3: 스토리보드"
     ])
     
     # 각 탭 렌더링
-    with tab1:
+    with tab1a:
+        theme_expander.render(client)
+    
+    with tab1b:
         lyrics.render(client)
     
     with tab2:
