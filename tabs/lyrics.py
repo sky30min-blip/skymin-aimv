@@ -299,11 +299,29 @@ def render(client):
     # ============ 기본 정보 섹션 ============
     st.subheader("📝 기본 정보")
     
+    # ⭐ Tab 1-A에서 넘어온 주제 자동 입력
+    default_topic = ""
+    if "expanded_theme_for_lyrics" in st.session_state:
+        default_topic = st.session_state["expanded_theme_for_lyrics"]
+        st.success("✅ Tab 1-A에서 선택한 주제가 자동으로 입력되었습니다!")
+        
+        # 추천사항도 표시
+        if any(key in st.session_state for key in ["recommended_genre", "recommended_vocal", "recommended_vibe", "recommended_keywords"]):
+            st.info(f"""
+            💡 **AI 추천 설정:**
+            - 장르: {st.session_state.get('recommended_genre', '-')}
+            - 보컬: {st.session_state.get('recommended_vocal', '-')}
+            - Vibe: {st.session_state.get('recommended_vibe', '-')}
+            - 키워드: {st.session_state.get('recommended_keywords', '-')}
+            """)
+    
     topic = st.text_area(
+        "🎯 노래 주제 / 스토리 / 긴 이야기",
         "🎯 노래 주제 / 스토리",
+        value=default_topic,
         placeholder="예: 새벽 3시 편의점에서 마주친 전 여자친구\n\n긴 내용도 OK (소설 줄거리, 일기 등)",
         height=150,
-        help="한 줄이든 장문이든 OK! AI가 핵심을 추출하여 가사로 만듭니다."
+        help="한 줄이든 장문이든 OK! AI가 핵심을 추출하여 가사로 만듭니다. Tab 1-A에서 주제를 확장할 수도 있습니다!"
     )
     
     col1, col2 = st.columns(2)
@@ -556,7 +574,9 @@ A [Gender] vocalist sings over a [Genre] piece. It features a [Tempo] and a [Moo
                     break
         
         # 가사 표시
-        st.text_area("가사 내용", value=main_lyrics, height=400, label_visibility="collapsed")
+        st.markdown("**📜 가사 전문**")
+        st.code(main_lyrics, language=None)
+        st.caption("👆 위 가사를 길게 눌러 복사하세요 (모바일)")
         
         char_count = len(main_lyrics.replace(" ", "").replace("\n", ""))
         st.caption(f"📊 총 {char_count}자 (공백 제외)")
@@ -594,8 +614,136 @@ A [Gender] vocalist sings over a [Genre] piece. It features a [Tempo] and a [Moo
         if suno_tags:
             st.divider()
             st.info("🎵 **Suno 최적화 프롬프트 (Copy & Paste)**")
-            st.markdown(suno_tags)
-            st.caption("💡 위 문단을 Suno AI의 프롬프트 입력란에 그대로 붙여넣으세요!")
+            
+            # Suno 프롬프트 추출 (마크다운 제거)
+            suno_prompt_text = suno_tags.replace("💡 **Suno 최적화 프롬프트 (Copy & Paste):**", "").replace("💡 Suno", "").strip()
+            # 첫 문단만 추출 (실제 프롬프트 부분)
+            if "\n\n" in suno_prompt_text:
+                suno_prompt_text = suno_prompt_text.split("\n\n")[0]
+            
+            st.code(suno_prompt_text, language=None)
+            st.caption("👆 위 문단을 Suno AI의 프롬프트 입력란에 붙여넣으세요!")
+        
+        st.divider()
+        
+        # ============ ⭐ NEW: 장르/스타일만 변경하기 ============
+        with st.expander("🎨 장르/스타일만 변경하기"):
+            st.markdown("""
+            **💡 가사는 그대로 두고 장르와 스타일 태그만 바꿉니다.**
+            
+            예: 발라드로 만든 가사를 시티팝 스타일로 변경
+            """)
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                new_genre = st.selectbox(
+                    "변경할 장르",
+                    GENRE_LIST,
+                    index=0,
+                    key="style_change_genre"
+                )
+            
+            with col2:
+                new_vibe = st.selectbox(
+                    "Vibe",
+                    [v[0] for v in VIBE_LIST],
+                    key="style_change_vibe"
+                )
+            
+            if st.button("🎨 스타일 태그 다시 생성", use_container_width=True, key="regenerate_style"):
+                if new_genre == "선택해주세요":
+                    st.error("장르를 선택해주세요.")
+                elif client is None:
+                    st.error("API 키가 설정되지 않았습니다.")
+                else:
+                    # 현재 보컬 타입 가져오기
+                    current_vocal_type = st.session_state.get("lyrics_vocal_type", "솔로 (남성)")
+                    
+                    # 장르 변경 프롬프트
+                    style_change_prompt = f"""다음 가사의 장르를 **{new_genre}**로 변경하고, Vibe는 **{new_vibe}**로 설정해주세요.
+
+## 기존 가사 (내용은 절대 변경하지 말 것!)
+{main_lyrics}
+
+## 요구사항
+1. **가사 내용과 구조는 100% 유지**
+2. **장르에 맞는 Mureka V7.6 Pro 스타일 태그 생성**:
+   - {new_genre}에 어울리는 악기 조합
+   - 적절한 BPM
+   - 장르 특성에 맞는 분위기 키워드
+   
+3. **장르에 맞는 Suno 5단계 프롬프트 생성**:
+   - Identity: {new_genre} 장르로 명시
+   - Mood: {new_vibe}에 맞는 분위기
+   - Instruments: {new_genre}의 특징적인 악기 연주 방식
+   - Performance: {new_genre}에 어울리는 보컬 스타일
+   - Production: {new_genre}의 프로덕션 특성
+
+## 출력 형식
+가사는 절대 출력하지 말고, 아래 두 가지만 출력하세요:
+
+---
+💡 **Mureka V7.6 Pro 스타일 태그:**
+`[악기], [장르], [보컬], [BPM], [분위기]`
+
+---
+💡 **Suno 최적화 프롬프트 (5단계 문장형):**
+(5단계 공식에 따라 하나의 영어 문단으로 작성)
+
+지금 바로 위 형식으로 스타일 태그만 생성해주세요!"""
+
+                    with st.spinner(f"🎨 {new_genre} 스타일 태그 생성 중..."):
+                        try:
+                            style_response = get_gpt_response(client, SYSTEM_ROLE, style_change_prompt)
+                            
+                            # Mureka 태그 추출
+                            new_mureka_tag = ""
+                            if "Mureka" in style_response or "💡" in style_response:
+                                mureka_start = style_response.find("💡")
+                                mureka_end = style_response.find("---", mureka_start + 1)
+                                if mureka_end == -1:
+                                    mureka_end = style_response.find("💡", mureka_start + 1)
+                                if mureka_end != -1:
+                                    mureka_section = style_response[mureka_start:mureka_end]
+                                    # 백틱 안의 내용 추출
+                                    if "`" in mureka_section:
+                                        new_mureka_tag = mureka_section.split("`")[1].strip()
+                            
+                            # 세션 스테이트 업데이트
+                            if new_mureka_tag:
+                                st.session_state["mureka_style_tag"] = new_mureka_tag
+                            st.session_state["lyrics_genre"] = new_genre
+                            st.session_state["lyrics_vibe"] = new_vibe
+                            
+                            st.success(f"🎉 {new_genre} 스타일로 변경되었습니다!")
+                            
+                            # 결과 표시
+                            st.markdown("**🎵 새로운 Mureka 태그:**")
+                            st.code(new_mureka_tag, language=None)
+                            
+                            st.markdown("**🎵 새로운 Suno 프롬프트:**")
+                            # Suno 프롬프트 추출
+                            suno_start = style_response.find("Suno")
+                            if suno_start != -1:
+                                suno_section = style_response[suno_start:]
+                                # 첫 문단 추출
+                                lines = suno_section.split("\n")
+                                suno_prompt = ""
+                                for line in lines:
+                                    if line.strip() and not line.startswith("💡") and not line.startswith("#"):
+                                        suno_prompt += line.strip() + " "
+                                if suno_prompt:
+                                    st.code(suno_prompt.strip(), language=None)
+                            
+                            st.info("💡 페이지를 새로고침하면 위에 반영된 태그가 보입니다!")
+                            
+                            # 새로고침 버튼
+                            if st.button("🔄 페이지 새로고침", use_container_width=True):
+                                st.rerun()
+                            
+                        except Exception as e:
+                            st.error(f"오류 발생: {str(e)}")
         
         st.divider()
         
