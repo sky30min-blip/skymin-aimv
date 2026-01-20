@@ -67,44 +67,111 @@ def get_vocal_instruction(vocal_type: str) -> str:
         
         "혼성 듀엣 (남/녀)": """
 ## 보컬 구조 지시사항 (혼성 듀엣) ⭐ 매우 중요!
-- **화자 명시 필수**: [Verse 1 - Male], [Verse 2 - Female], [Chorus - Harmony]
-- 각 파트마다 누가 부르는지 태그로 명확히 구분
-- 하모니 파트는 [Harmony], [Duet], [Both] 태그 사용
-- 대화하듯 주고받는 구조 권장
 
-**Few-Shot 예시 (반드시 이 형식 따를 것!):**
+### ⚠️ 핵심 원칙: 블록 단위 배분 (Block Assignment)
+**DO NOT alternate lines frequently!** 
+리스너의 몰입을 위해 **섹션 전체를 한 명에게 배정**하세요.
 
-[Intro - Both]
-(Atmospheric synth)
-(Male) 첫 번째 라인
-(Female) 두 번째 라인
+### 몰입감 중심 구조 (Immersive Structure)
+
+**1. 블록 단위 파트 배분:**
+- ❌ 나쁜 예: 한 소절씩 남녀가 번갈아 부르기 (음색이 튐, 몰입 방해)
+- ✅ 좋은 예: [Verse 1] 전체는 남성, [Verse 2] 전체는 여성
+
+**2. 빌드업 구조 (Emotional Buildup):**
+- **[Intro]:** 한 명 또는 악기만 (분위기 조성)
+- **[Verse 1 - Male or Female]:** 한 명이 **최소 4~8행 이상** 전담하여 서사 시작
+- **[Verse 2 - Opposite Gender]:** 다른 한 명이 **최소 4~8행 이상** 전담하여 감정 확장
+- **[Pre-Chorus - Call & Response]:** 여기서 처음으로 짧게 대화하듯 교차 (긴장감 조성)
+- **[Chorus - Together/Harmony]:** 두 보컬 화음 위주, 음색 섞이게 구성
+- **[Bridge - Emotional Peak]:** 감정 폭발, Together 또는 Solo 섹션
+
+**3. 교차 허용 시점:**
+- Pre-Chorus에서만 짧게 대화
+- Bridge에서 클라이맥스 연출
+- Outro에서 여운
+
+### 구조적 예시 (Few-Shot) - 반드시 이 형식 따를 것!
+
+```
+[Intro - Instrumental or Solo]
+(Soft piano intro, atmospheric)
+(Optional: 한 명이 짧게 시작)
 
 [Verse 1 - Male]
-(Clear male vocal)
-남성 파트 가사...
-남성 파트 가사...
+(Clear male vocal, steady rhythm)
+남성이 4~8행 이상 부르며 이야기 시작
+음색에 적응할 시간을 충분히 주세요
+청자가 이 보컬에 몰입하도록
+파트를 쪼개지 마세요
 
 [Verse 2 - Female]
-(Soft female vocal)
-여성 파트 가사...
-여성 파트 가사...
+(Soft female vocal, emotional depth)
+여성이 4~8행 이상 부르며 이야기 전개
+남성 파트와는 다른 관점 제시
+역시 충분한 분량으로
+섹션 전체를 전담합니다
 
-[Pre-Chorus - Both]
-(Building harmony)
-(Male) 남성 라인
-(Female) 여성 라인
+[Pre-Chorus - Call & Response]
+(Building tension)
+(Male) 짧은 질문 또는 제시
+(Female) 짧은 응답
+(Male) 다시 한 번
+(Female) 마지막 응답
+(Together) 함께 브릿지로
 
-[Chorus - Harmony]
-(Powerful duet, full harmony)
-함께 부르는 후렴구...
-함께 부르는 후렴구...
+[Chorus - Together/Harmony]
+(Full power, dual harmony, layered vocals)
+함께 부르는 후렴구
+화음 위주로 구성
+두 음색이 자연스럽게 섞임
+여기서는 개별 태그 대신 Together 사용
 
-[Bridge - Male & Female Alternating]
-(Male) 남성 라인
-(Female) 여성 응답
-(Male) 남성 라인
-(Female) 여성 응답
-(Both) 함께 마무리
+[Verse 3 or Bridge - Alternating or Solo]
+(Male leading or Female leading)
+필요시 한 명이 브릿지 전담
+또는 감정 폭발을 위한 교차
+
+[Chorus - Together/Harmony]
+(Powerful duet, final climax)
+마지막 후렴구
+두 보컬 최대 시너지
+
+[Outro - Together or Fade]
+(Soft fade out)
+함께 마무리 또는 한 명이 여운
+```
+
+### 절대 규칙 (Absolute Rules)
+1. **Do not alternate lines frequently within a single section**
+2. **Assign full sections (4-8+ lines) to each gender for better immersion**
+3. **Allow mixing only in Pre-Chorus, Chorus, Bridge, and Outro**
+4. **Verse sections must be dominated by one vocalist**
+5. **Give listeners time to adapt to each vocal tone**
+
+### 나쁜 예시 (절대 금지!)
+```
+❌ [Verse 1]
+(Male) 첫 번째 줄
+(Female) 두 번째 줄  ← 너무 자주 교차!
+(Male) 세 번째 줄
+(Female) 네 번째 줄  ← 몰입 방해!
+```
+
+### 좋은 예시
+```
+✅ [Verse 1 - Male]
+남성이 6~8줄 부르며
+이야기를 온전히 전개
+청자가 음색에 적응
+자연스러운 몰입 유도
+
+✅ [Verse 2 - Female]
+여성이 6~8줄 부르며
+다른 시각 제시
+충분한 시간으로
+감정 전달 완성
+```
 """,
         
         "합창/콰이어": """
@@ -350,15 +417,22 @@ def render(client):
    - [Intro], [Verse 1], [Pre-Chorus], [Chorus], [Verse 2], [Bridge], [Outro]
    - 보컬 타입에 따라 화자 명시 (예: [Verse 1 - Male])
 
-2. **연출 지시어 필수**:
+2. **듀엣 곡 몰입감 규칙** (혼성 듀엣 선택 시):
+   - ⚠️ **블록 단위 배분**: 한 소절씩 교차 금지! 섹션 전체를 한 명에게 배정
+   - ✅ [Verse 1] 전체 = 한 명, [Verse 2] 전체 = 다른 한 명
+   - ✅ 교차는 Pre-Chorus, Bridge에서만 허용
+   - ✅ Chorus는 Together/Harmony 위주
+   - **Do not alternate lines frequently within sections!**
+
+3. **연출 지시어 필수**:
    - 가사 줄 사이에 괄호로 음악적 연출 삽입
    - 예: (Piano intro), (Build up), (Vocal emphasis), (Fade out)
 
-3. **Sound FX 활용**:
+4. **Sound FX 활용**:
    - 분위기에 맞는 효과음 지시어 추가
    - 예: (Clock ticking), (Rain falling), (Gunshot), (Thunder)
 
-4. **Mureka & Suno 스타일 태그 생성**:
+5. **Mureka & Suno 스타일 태그 생성**:
    - Mureka V7.6 Pro: 악기, 장르, 보컬, BPM, 분위기
    - Suno AI: 영어 태그 10개 내외
 
@@ -566,8 +640,9 @@ def render(client):
 1. **가사 내용은 절대 변경하지 마세요** - 원문 그대로 유지!
 2. 각 파트 앞에 구조 태그 추가: [Intro], [Verse], [Chorus] 등
 3. 적절한 위치에 연출 지시어 삽입: (Piano intro), (Build up) 등
-4. 보컬 타입에 맞는 화자 태그 추가 (듀엣인 경우 [Male]/[Female])
-5. Mureka 스타일 태그와 Suno 스타일 태그 생성
+4. 보컬 타입에 맞는 화자 태그 추가
+5. **듀엣인 경우**: 블록 단위로 [Male]/[Female] 배정, 잦은 교차 금지!
+6. Mureka 스타일 태그와 Suno 스타일 태그 생성
 
 ## 출력 형식
 [제목]
