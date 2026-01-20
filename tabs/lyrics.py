@@ -434,7 +434,7 @@ def render(client):
 
 5. **Mureka & Suno 스타일 태그 생성**:
    - Mureka V7.6 Pro: 악기, 장르, 보컬, BPM, 분위기
-   - Suno AI: 영어 태그 10개 내외
+   - Suno AI: 5단계 문장형 프롬프트 (Identity → Mood → Instruments → Performance → Production)
 
 ## 출력 형식 (Suno/Udio 최적화)
 
@@ -467,8 +467,9 @@ def render(client):
 `[악기], [장르], [보컬], [BPM], [분위기]`
 
 ---
-💡 **Suno AI 추천 스타일 태그:**
-`[영어 태그들]`
+💡 **Suno 최적화 프롬프트 (5단계 문장형 - Copy & Paste):**
+(5단계 공식에 따라 하나의 영어 문단으로 작성)
+A [Gender] vocalist sings over a [Genre] piece. It features a [Tempo] and a [Mood], set in a [Key]. The [Instrument1] plays [Style1], while the [Instrument2] provides [Role2]. The vocals are delivered in a [Range/Texture] with [Technique]. The production is [Mix Style], featuring [Effects] and a [Structure].
 
 지금 바로 Suno/Udio에서 최상의 결과를 낼 수 있는 가사를 작성해주세요!"""
 
@@ -543,9 +544,9 @@ def render(client):
                     lyrics_content = lyrics_content[mureka_end:]
                     break
         
-        # Suno 태그 추출
-        if "Suno AI" in lyrics_content or "스타일 태그" in lyrics_content:
-            tag_markers = ["💡 **Suno", "💡 Suno", "---\n💡", "Suno AI 추천"]
+        # Suno 5단계 프롬프트 추출
+        if "Suno 최적화 프롬프트" in lyrics_content or "Suno AI" in lyrics_content or "스타일 태그" in lyrics_content:
+            tag_markers = ["💡 **Suno", "💡 Suno", "---\n💡", "Suno AI", "Suno 최적화"]
             for marker in tag_markers:
                 if marker in lyrics_content:
                     split_index = lyrics_content.find(marker)
@@ -589,10 +590,12 @@ def render(client):
                     use_container_width=True
                 )
         
-        # Suno 태그 표시
+        # Suno 프롬프트 표시
         if suno_tags:
             st.divider()
+            st.info("🎵 **Suno 최적화 프롬프트 (Copy & Paste)**")
             st.markdown(suno_tags)
+            st.caption("💡 위 문단을 Suno AI의 프롬프트 입력란에 그대로 붙여넣으세요!")
         
         st.divider()
         
@@ -656,8 +659,8 @@ def render(client):
 `...`
 
 ---
-💡 **Suno AI 추천 스타일 태그:**
-`...`
+💡 **Suno 최적화 프롬프트 (5단계 문장형):**
+(5단계 공식에 따라 하나의 영어 문단으로 작성)
 """
                     else:
                         # 재작성 모드: 요청사항 반영하여 재작성
@@ -692,8 +695,8 @@ def render(client):
 `...`
 
 ---
-💡 **Suno AI 추천 스타일 태그:**
-`...`
+💡 **Suno 최적화 프롬프트 (5단계 문장형):**
+(5단계 공식에 따라 하나의 영어 문단으로 작성)
 """
                     
                     with st.spinner("🛠️ 가사를 수정하고 있습니다..."):
