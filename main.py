@@ -218,6 +218,42 @@ def main():
     
     with tab3:
         storyboard.render(client)
+    
+    # ============ 하단 탭 네비게이션 ============
+    st.divider()
+    st.markdown("### 🔄 다른 단계로 이동")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.info("""
+        **💡 Step 1-A**
+        
+        주제 확장
+        """)
+    
+    with col2:
+        st.info("""
+        **🎵 Step 1-B**
+        
+        가사 생성
+        """)
+    
+    with col3:
+        st.info("""
+        **🎨 Step 2**
+        
+        캐릭터 생성
+        """)
+    
+    with col4:
+        st.info("""
+        **🎬 Step 3**
+        
+        스토리보드
+        """)
+    
+    st.caption("💡 위 탭을 클릭하거나, 페이지 상단의 탭을 이용하세요!")
 
 
 if __name__ == "__main__":
