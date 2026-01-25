@@ -240,25 +240,125 @@ neon signs in purple and blue, rain creating ripples in puddles
 
 ## 이미지 묘사 작성 규칙 (Step 1)
 
-### 필수 포함:
-1. **구체적 시각 정보만** (추상적 표현 금지)
-   - ❌ "슬픈 소녀" → ✅ "Girl with tear-stained cheeks, slouched posture"
+### ⭐ 핵심 원칙: 시각적 직유 (Visual Literalism) ⭐
+
+**Midjourney는 은유를 이해하지 못합니다. 가사의 비유적/추상적 표현을 반드시 물리적 실체로 변환하세요.**
+
+#### 시각적 번역 규칙:
+
+1. **추상적 비유 → 물리적 실체 변환 (필수!)**
    
-2. **감각적 디테일**
-   - 조명: "golden hour sunlight", "neon glow", "candlelight"
-   - 색감: "warm orange tones", "cool blue atmosphere"
-   - 질감: "rain-streaked glass", "worn leather jacket"
+   **❌ 금지되는 비유적 표현:**
+   - "인류를 밝히는 다섯 별"
+   - "희망의 빛"
+   - "사이버 세계의 영혼"
+   - "사랑의 바람"
+   - "별이 내려온다"
+   
+   **✅ 물리적 변환 (정답):**
+   - "Five ancient sages (Confucius, Buddha, Socrates, etc.) holding glowing lanterns, walking along a dark ancient path, warm golden light illuminating their faces"
+   - "Intense golden sunlight beams breaking through dark storm clouds, casting dramatic rays onto the ground"
+   - "Computer server room filled with glowing blue LED circuits, holographic data streams flowing between servers, cybernetic heart pulsing with light"
+   - "Gentle breeze blowing through cherry blossoms, pink petals swirling around a couple holding hands"
+   - "Five robed figures descending from sky on beams of light, feet touching ground, ethereal glow surrounding them"
 
-3. **구도와 앵글**
-   - "close-up portrait", "wide angle view", "bird's eye view"
+2. **추상 단어 완전 제거**
+   
+   **절대 사용 금지 단어:**
+   - "Representing..." (대표하는)
+   - "Symbolizing..." (상징하는)
+   - "Concept of..." (개념의)
+   - "Metaphor for..." (은유로서)
+   - "Abstract..." (추상적인)
+   
+   **대신 이렇게:**
+   - 눈에 보이는 **피사체(Subject)**를 직접 명시
+   - "별" → "Five sages holding lanterns"
+   - "빛" → "Golden sunlight beams" 또는 "Glowing lantern light"
+   - "영혼" → "Translucent human figure glowing with inner light"
 
-4. **가사 연출 지시어 반영**
-   - `(Piano intro)` → "grand piano with keys visible, spotlight on piano"
-   - `(Build up)` → "dynamic composition, dramatic lighting, tension"
+3. **구체적 피사체를 문장 첫 단어로 배치**
+   
+   **❌ 나쁜 순서:**
+   - "In a mystical atmosphere, hope appears"
+   
+   **✅ 좋은 순서:**
+   - "A young woman in white robes standing at cliff edge, arms spread wide, golden sunrise behind her, wind blowing her hair"
 
-### ⚠️ 주의사항:
-- 영어로 작성 (Midjourney 최적화)
-- **스타일 키워드는 절대 포함하지 마세요!** (시스템이 Step 2에서 자동 추가)
+### 필수 포함 요소:
+
+1. **Subject (주체)** - 문장 첫 단어
+   - 사람: "A sage", "Five robed figures", "Young woman"
+   - 사물: "Ancient lantern", "Glowing orb", "Server rack"
+   - 동물: "White dove", "Golden phoenix"
+   
+2. **Physical Description (물리적 묘사)**
+   - 외형: "wearing traditional robes", "holding lantern", "with flowing hair"
+   - 자세: "standing tall", "kneeling", "arms spread wide"
+   - 표정: "serene expression", "eyes closed peacefully"
+
+3. **Environment (환경)**
+   - 장소: "ancient temple courtyard", "modern server room", "cliff edge"
+   - 날씨/시간: "at golden hour sunset", "during thunderstorm", "midnight with stars"
+   - 구체적 디테일: "stone pillars", "floating data streams", "swirling mist"
+
+4. **Lighting & Color (조명과 색)**
+   - 빛의 원천: "lantern light", "sunbeams", "neon glow", "LED circuits"
+   - 색온도: "warm golden", "cool blue", "vibrant purple"
+   - 방향: "from behind", "spotlight from above", "ambient glow"
+
+5. **Composition (구도)**
+   - "close-up portrait", "wide establishing shot", "bird's eye view"
+   - "low angle looking up", "over the shoulder shot"
+
+### 가사별 변환 예시:
+
+**가사: "다섯 별이 길을 밝힌다"**
+- ❌ 틀린 변환: "Five stars illuminating the path, representing enlightenment"
+- ✅ 올바른 변환: "Five ancient sages in traditional robes holding glowing lanterns, walking along dark stone path, warm golden light creating long shadows, serene expressions"
+
+**가사: "희망의 빛이 비춘다"**
+- ❌ 틀린 변환: "Light of hope shining, symbolic rays"
+- ✅ 올바른 변환: "Intense golden sunlight breaking through dark storm clouds, dramatic god rays casting down onto wet ground, rainbow forming in distance"
+
+**가사: "사이버 영혼이 춤춘다"**
+- ❌ 틀린 변환: "Cyber soul dancing, digital concept"
+- ✅ 올바른 변환: "Translucent holographic human figure composed of blue glowing data streams, dancing gracefully in futuristic server room, circuit patterns flowing across body, neon purple reflections"
+
+**가사: "별이 내려와 축복한다"**
+- ❌ 틀린 변환: "Stars descending and blessing, celestial imagery"
+- ✅ 올바른 변환: "Five robed celestial beings descending from night sky on beams of starlight, feet gently touching ground, hands raised in blessing gesture, soft ethereal glow surrounding them, ancient temple in background"
+
+### ⚠️ 치명적 실수 방지:
+
+1. **"별" 언급 시 주의!**
+   - 단순히 "stars in sky"라고 쓰면 → 밤하늘 풍경만 나옴
+   - 가사의 맥락상 인물을 의미하면 → "Five sages/beings/figures" 명시!
+
+2. **"빛" 언급 시 주의!**
+   - 단순히 "light"라고 쓰면 → 추상적 빛 덩어리만 나옴
+   - 빛의 **물리적 원천** 명시: "lantern light", "sunbeams", "LED glow"
+
+3. **"영혼/정신" 언급 시 주의!**
+   - 단순히 "soul/spirit"라고 쓰면 → Midjourney 혼란
+   - **시각화 가능한 형태** 제시: "translucent figure", "glowing silhouette", "ethereal being"
+
+### 가사 연출 지시어 반영:
+
+- `(Piano intro)` → "Grand piano with ivory keys visible in spotlight, pianist's hands hovering over keys"
+- `(Build up)` → "Dynamic composition with tension, character leaning forward, muscles tensed, dramatic side lighting"
+- `(Emotional cry)` → "Close-up of face with tears streaming, mouth open in cry, hands clutching chest"
+
+### 최종 체크리스트:
+
+✅ 문장이 **구체적 피사체(명사)**로 시작하는가?
+✅ 추상적 단어 (representing, symbolizing) 없는가?
+✅ 비유를 **물리적 실체**로 변환했는가?
+✅ 조명의 **원천**을 명시했는가?
+✅ 영어로 작성되었는가?
+✅ 스타일 키워드를 포함하지 않았는가? (시스템이 Step 2에서 추가)
+
+**기억하세요: Midjourney는 시인이 아니라 사진작가입니다. 눈에 보이는 것만 그릴 수 있습니다!**
 
 ## 모션 묘사 작성 규칙
 
@@ -480,13 +580,63 @@ def render(client):
 ## 영상 분위기
 {video_mood_en}
 
-## ⭐ 중요 지시사항 ⭐
+## ⭐⭐⭐ 초강력 주의사항: 시각적 번역 (Visual Translation) ⭐⭐⭐
 
-**각 장면마다 2단계 조립 공식을 적용하세요:**
+**Midjourney는 은유를 이해하지 못합니다!**
+
+가사에 '별', '바람', '사랑', '희망', '영혼' 같은 **추상적 비유**가 등장하더라도, 
+Step 1(장면 묘사)에서는 반드시 **'사람', '물건', '구체적 배경'** 등 **물리적 실체**로 바꾸어 묘사하십시오.
+
+### 필수 변환 규칙:
+
+1. **"별" 언급 시:**
+   - ❌ "stars shining" (X) → 단순 밤하늘만 나옴
+   - ✅ "Five ancient sages holding glowing lanterns" (O) → 인물 중심 장면
+   
+2. **"빛" 언급 시:**
+   - ❌ "light of hope" (X) → 추상적 빛만 나옴
+   - ✅ "Golden sunbeams breaking through dark clouds" (O) → 구체적 빛의 원천
+   
+3. **"영혼/정신" 언급 시:**
+   - ❌ "cyber soul" (X) → Midjourney 혼란
+   - ✅ "Translucent holographic human figure composed of glowing data streams" (O) → 시각화 가능한 형태
+
+### 실전 예시:
+
+**가사: "다섯 별이 길을 밝힌다"**
+→ ✅ "Five ancient sages in traditional robes holding glowing lanterns, walking along dark stone path, warm golden light creating long shadows"
+
+**가사: "희망의 빛이 비춘다"**
+→ ✅ "Intense golden sunlight breaking through dark storm clouds, dramatic god rays casting down onto wet ground"
+
+**가사: "사이버 영혼이 춤춘다"**
+→ ✅ "Translucent holographic human figure composed of blue glowing data streams, dancing gracefully in futuristic server room, circuit patterns flowing across body"
+
+**가사: "별이 내려와 축복한다"**
+→ ✅ "Five robed celestial beings descending from night sky on beams of starlight, feet gently touching ground, hands raised in blessing gesture"
+
+### 절대 금지 단어:
+- "Representing..." (대표하는)
+- "Symbolizing..." (상징하는)
+- "Concept of..." (개념의)
+- "Metaphor for..." (은유로서)
+
+### 반드시 지켜야 할 것:
+1. **구체적 피사체(명사)를 문장 첫 단어로 배치**
+2. **물리적 실체만 묘사** (추상 개념 금지)
+3. **조명의 원천을 명확히** ("light" 대신 "sunlight", "lantern glow", "LED light")
+
+**이것을 지키면:** `--cref`로 제공한 참조 이미지 속 인물 얼굴이 정확히 반영됩니다!
+**이것을 안 지키면:** 배달 사고 발생 (별만 그려지고 인물은 사라짐)
+
+---
+
+## ⭐ 2단계 조립 공식 적용 ⭐
 
 ### Step 1: Subject Generation
-- 가사 내용을 구체적 시각 정보로 변환
-- 주체, 환경, 조명, 구도 모두 포함
+- 가사의 비유를 **물리적 실체**로 변환
+- **구체적 피사체**를 문장 첫 단어로 배치
+- 주체, 환경, 조명 원천, 구도 모두 포함
 - **스타일 키워드는 절대 포함하지 마세요!**
 
 ### Step 2: Style Integration (시스템이 자동 처리)
@@ -502,17 +652,19 @@ def render(client):
 
 장면 구분자: `|||`
 
-## 예시:
+## 올바른 예시:
+
 ```
-빗속에서 슬픈 표정으로 서 있는 소녀 ### A melancholic girl in white dress standing under flickering streetlight, tear-stained cheeks glistening, wet streets reflecting neon signs @@@ Slow zoom in, rain falling ||| 하늘을 올려다보며 희망을 품는 모습 ### She tilts head upward gazing at dark clouds, hopeful expression, sunlight breaking through @@@ Camera pans upward |||
+다섯 성인이 등불을 들고 길을 밝힌다 ### Five ancient sages in flowing traditional robes holding glowing golden lanterns, walking along dark ancient stone path at night, warm lantern light illuminating their serene faces, long shadows stretching behind them, misty atmosphere @@@ Slow tracking shot following their steps, camera at waist level ||| 천상의 빛이 내려와 축복을 내린다 ### Five robed celestial beings descending from starlit night sky on beams of golden light, feet gently touching temple courtyard ground, hands raised in blessing gesture, soft ethereal glow surrounding their bodies, peaceful expressions @@@ Camera tilts upward following their descent |||
 ```
 
-⚠️ 주의:
-- 이미지 묘사에 스타일 키워드 포함 금지!
-- 구체적 시각 정보만 사용
-- 정확히 20개 장면 생성
+⚠️ 다시 한번 강조:
+- **이미지 묘사에 스타일 키워드 포함 금지!**
+- **비유를 물리적 실체로 변환!**
+- **구체적 피사체를 문장 첫 단어로!**
+- **정확히 20개 장면 생성!**
 
-지금 바로 20개 장면을 위 형식으로 생성해주세요!"""
+지금 바로 위 규칙을 엄격히 준수하여 20개 장면을 생성해주세요!"""
 
         with st.spinner("🎬 AI가 20개 장면을 분석하고 있습니다... (약 1-2분)"):
             try:
