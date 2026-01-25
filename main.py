@@ -219,41 +219,77 @@ def main():
     with tab3:
         storyboard.render(client)
     
-    # ============ 하단 탭 네비게이션 ============
+    # ============ 하단 네비게이션 ============
     st.divider()
-    st.markdown("### 🔄 다른 단계로 이동")
+    st.markdown("### 🔄 탭 전환하기")
+    
+    col1, col2 = st.columns([3, 1])
+    
+    with col1:
+        st.info("""
+        **탭을 전환하려면:**
+        1. 오른쪽 버튼을 눌러 페이지 상단으로 이동
+        2. 원하는 탭을 클릭하세요
+        """)
+    
+    with col2:
+        # JavaScript로 상단 스크롤
+        scroll_to_top = st.button("⬆️ 상단으로 이동", use_container_width=True, type="primary")
+        
+        if scroll_to_top:
+            st.markdown(
+                """
+                <script>
+                window.scrollTo({top: 0, behavior: 'smooth'});
+                </script>
+                """,
+                unsafe_allow_html=True
+            )
+    
+    st.divider()
+    
+    # 단계별 안내
+    st.markdown("### 📋 각 단계 요약")
     
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.info("""
+        st.markdown("""
         **💡 Step 1-A**
         
-        주제 확장
+        주제 확장 (선택)
+        - 짧은 주제 입력
+        - AI가 3가지 버전 생성
         """)
     
     with col2:
-        st.info("""
+        st.markdown("""
         **🎵 Step 1-B**
         
         가사 생성
+        - 장르, Vibe 선택
+        - Suno/Udio 최적화
+        - Mureka 태그
         """)
     
     with col3:
-        st.info("""
+        st.markdown("""
         **🎨 Step 2**
         
         캐릭터 생성
+        - 마스터 이미지 프롬프트
+        - URL 저장
         """)
     
     with col4:
-        st.info("""
+        st.markdown("""
         **🎬 Step 3**
         
         스토리보드
+        - 20개 장면 프롬프트
+        - AI 스타일 추천
+        - 편집 레시피
         """)
-    
-    st.caption("💡 위 탭을 클릭하거나, 페이지 상단의 탭을 이용하세요!")
 
 
 if __name__ == "__main__":
