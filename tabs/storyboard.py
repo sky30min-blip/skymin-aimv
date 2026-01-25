@@ -520,6 +520,57 @@ def set_scene_override(scene_key: str, override_text: str):
         del st.session_state["scene_overrides"][scene_key]
 
 
+def translate_korean_to_prompt(client, korean_text: str, visual_anchor: str) -> str:
+    """한글 설명을 영어 Midjourney 프롬프트로 변환합니다."""
+    
+    system_prompt = """당신은 한글 장면 설명을 고품질 영어 Midjourney 프롬프트로 변환하는 전문가입니다.
+
+## 변환 규칙:
+
+1. **Visual Literalism (시각적 직유)**
+   - 추상적 표현을 구체적 물리적 실체로 변환
+   - 예: "희망" → "golden sunlight breaking through clouds"
+   - 예: "슬픔" → "tears streaming down cheeks, downcast eyes"
+
+2. **필수 포함 요소:**
+   - Subject (주체): 구체적 외형, 자세, 표정
+   - Environment (환경): 장소, 시간, 날씨
+   - Lighting (조명): 빛의 원천과 방향
+   - Composition (구도): 카메라 각도
+
+3. **금지 사항:**
+   - 추상적 단어: "representing", "symbolizing", "concept of"
+   - 스타일 키워드 포함 금지 (시스템이 자동 추가)
+
+4. **문장 구조:**
+   - 구체적 명사로 시작
+   - 물리적 묘사만 사용
+   - 영어로만 출력
+
+## 출력 형식:
+영어 프롬프트만 출력하고, 추가 설명이나 주석은 절대 포함하지 마세요."""
+
+    user_prompt = f"""다음 한글 장면 설명을 영어 Midjourney 프롬프트로 변환해주세요.
+
+## Visual Anchor (반드시 프롬프트 앞에 포함)
+{visual_anchor}
+
+## 한글 장면 설명
+{korean_text}
+
+## 변환 예시:
+한글: "여자가 비 오는 거리에서 슬프게 서있다"
+영어: "{visual_anchor}, standing in heavy rain on dark city street, tears mixing with raindrops on cheeks, hands hanging loosely at sides, wet pavement reflecting neon lights"
+
+지금 바로 위 한글 설명을 영어 프롬프트로 변환해주세요. 영어 프롬프트만 출력하세요."""
+
+    try:
+        result = get_gpt_response(client, system_prompt, user_prompt)
+        return result.strip()
+    except Exception as e:
+        return f"변환 실패: {str(e)}"
+
+
 def render(client):
     """스토리보드 탭을 렌더링합니다."""
     
@@ -924,9 +975,49 @@ def render(client):
             
             with st.expander(scene_title, expanded=(i <= 3)):
                 
-                # 한글 설명
-                if scene.get('korean_desc'):
-                    st.info(f"📖 **장면 설명:** {scene['korean_desc']}")
+                # ============ 한글 설명 수정 및 영어 변환 ============
+                st.markdown("### 📖 장면 설명 (한글)")
+                
+                # 한글 설명 입력칸
+                korean_input_key = f"korean_desc_{scene_key}"
+                default_korean = scene.get('korean_desc', '')
+                
+                korean_desc_input = st.text_area(
+                    "장면을 한글로 설명하세요",
+                    value=default_korean,
+                    height=100,
+                    key=korean_input_key,
+                    placeholder="예: 여자가 비 오는 거리에서 우산을 쓰고 슬픈 표정으로 서 있다",
+                    help="한글로 수정한 후 '영어 프롬프트로 변환' 버튼을 누르세요"
+                )
+                
+                # 영어 변환 버튼
+                col_translate, col_clear = st.columns([3, 1])
+                
+                with col_translate:
+                    if st.button(f"🔄 영어 프롬프트로 변환", key=f"translate_{scene_key}", use_container_width=True):
+                        if not korean_desc_input.strip():
+                            st.error("한글 설명을 입력해주세요.")
+                        else:
+                            with st.spinner("🤖 GPT가 영어 프롬프트로 변환 중..."):
+                                visual_anchor = st.session_state.get("storyboard_visual_anchor", "")
+                                translated = translate_korean_to_prompt(client, korean_desc_input, visual_anchor)
+                                
+                                if translated and not translated.startswith("변환 실패"):
+                                    # 변환된 영어를 override로 저장
+                                    set_scene_override(scene_key, translated)
+                                    st.success("✅ 영어 프롬프트로 변환 완료!")
+                                    st.rerun()
+                                else:
+                                    st.error(f"변환 실패: {translated}")
+                
+                with col_clear:
+                    if st.button(f"🗑️ 초기화", key=f"clear_korean_{scene_key}", use_container_width=True):
+                        # 한글 설명을 원래대로 되돌림 (세션 상태 업데이트)
+                        st.info("한글 설명이 초기화되었습니다.")
+                        st.rerun()
+                
+                st.divider()
                 
                 # 사용자 수정 확인
                 override = get_scene_override(scene_key)
@@ -969,18 +1060,19 @@ def render(client):
                 
                 st.divider()
                 
-                # ============ 사용자 수정칸 ============
-                st.markdown("### ✏️ 이 장면 수정하기")
+                # ============ 영어 프롬프트 직접 수정 (고급) ============
+                st.markdown("### ✏️ 영어 프롬프트 직접 수정 (고급)")
+                st.caption("💡 위에서 '영어 프롬프트로 변환'을 사용했다면, 여기서 추가 미세 조정이 가능합니다.")
                 
                 current_override = get_scene_override(scene_key)
                 
                 user_edit = st.text_area(
-                    f"{scene_title} 수정 (비우면 AI 원본 사용)",
+                    f"{scene_title} 영어 프롬프트 직접 수정",
                     value=current_override,
                     height=100,
                     placeholder=f"예: {scene['image_prompt'][:100]}...",
                     key=f"override_{scene_key}",
-                    help="여기에 입력한 내용이 AI의 이미지 묘사를 대체합니다."
+                    help="영어 프롬프트를 직접 수정할 수 있습니다. 비우면 AI 원본 사용."
                 )
                 
                 col_save, col_reset = st.columns(2)
