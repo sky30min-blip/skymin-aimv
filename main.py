@@ -21,7 +21,7 @@ from utils import (
     import_project_from_json, 
     get_project_info_from_json
 )
-from tabs import theme_expander, lyrics, character, storyboard, visuals
+from tabs import theme_expander, lyrics, character, storyboard
 
 
 def init_session_state():
@@ -153,8 +153,10 @@ def render_sidebar(client):
         1. **Tab 1-A**: 주제 확장 (선택)
         2. **Tab 1-B**: 가사 생성
         3. **Tab 2**: 캐릭터 프롬프트
-        4. **Tab 3**: 스토리보드 (20개 장면)
-        5. **Tab 4**: AI 이미지 생성 ⭐
+        4. **Tab 3**: 스토리보드 (올인원!) 🎬
+           - 20개 장면 이미지 프롬프트
+           - AI 스타일 자동 추천
+           - 영상 편집 레시피
         """)
         
         st.divider()
@@ -196,13 +198,12 @@ def main():
     
     st.divider()
     
-    # 탭 생성 (5개로 확장)
-    tab1a, tab1b, tab2, tab3, tab4 = st.tabs([
+    # 탭 생성 (4개)
+    tab1a, tab1b, tab2, tab3 = st.tabs([
         "💡 Step 1-A: 주제 확장",
         "🎵 Step 1-B: 가사 생성",
         "🎨 Step 2: 캐릭터 생성",
-        "🎬 Step 3: 스토리보드",
-        "🖼️ Step 4: 이미지 생성"
+        "🎬 Step 3: 스토리보드"
     ])
     
     # 각 탭 렌더링
@@ -217,9 +218,6 @@ def main():
     
     with tab3:
         storyboard.render(client)
-    
-    with tab4:
-        visuals.render(client)
 
 
 if __name__ == "__main__":
