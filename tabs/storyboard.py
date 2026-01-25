@@ -1,25 +1,184 @@
 """
-tabs/storyboard.py - 스토리보드 생성 탭 (Tab 3)
-한글 UI 매핑 + 이미지 일관성 강제 프롬프트 조립 + 한글 설명 표시
+tabs/storyboard.py - 스토리보드 생성 탭 (Tab 3) - 완전 업그레이드
+STYLE_GUIDE + AI 자동 추천 + 2단계 조립 공식 + 영상 편집 레시피
 """
 
 import streamlit as st
 from utils import get_gpt_response
 
 
-# ============ 한글-영어 매핑 딕셔너리 ============
+# ============ 통합 스타일 가이드 (10종+) ============
 
-ART_STYLE_MAP = {
-    "지브리 스타일 (따뜻하고 섬세한)": "Studio Ghibli style, warm colors, soft lighting, hand-painted aesthetic",
-    "일본 애니메이션 (선명하고 역동적)": "Japanese anime style, vibrant colors, dynamic, cel-shaded",
-    "픽사/디즈니 3D (귀엽고 생동감)": "Pixar Disney 3D animation style, expressive, detailed, vibrant",
-    "실사 영화 (사실적이고 시네마틱)": "Photorealistic, cinematic lighting, high detail, movie still",
-    "사이버펑크 (네온, 미래적)": "Cyberpunk illustration, neon lights, futuristic, high contrast",
-    "한국 웹툰 (깔끔하고 감성적)": "Korean webtoon style, clean lines, emotional, soft shading",
-    "수채화 (부드럽고 몽환적)": "Watercolor illustration, soft edges, dreamy atmosphere, artistic",
-    "다크 판타지 (어둡고 신비로운)": "Dark fantasy style, dramatic lighting, mysterious, gothic",
-    "90년대 레트로 애니 (복고풍 감성)": "Retro 90s anime style, nostalgic, cel shading, vibrant colors, City Pop aesthetic, Lo-fi vibe, purple and blue neon lighting, dreamy atmosphere, vintage"
+STYLE_GUIDE = {
+    "AI 자동 추천": {
+        "image_keywords": "",
+        "video_keywords": "",
+        "effects": "",
+        "transitions": "",
+        "description": "가사의 장르와 분위기를 분석하여 AI가 최적의 스타일을 선택합니다",
+        "preview": "🤖"
+    },
+    
+    "르네상스 유화 (Renaissance Oil)": {
+        "image_keywords": "Renaissance oil painting style, dramatic chiaroscuro, high detail, religious masterpiece aesthetic, classical composition, golden age painting techniques",
+        "video_keywords": "Golden hour, candle light, slow motion, museum atmosphere",
+        "effects": "Film grain, warm glow, soft focus, vignette",
+        "transitions": "Cross dissolve, fade to black, slow zoom",
+        "description": "고전적이고 웅장한 분위기, 극적인 명암 대비",
+        "preview": "🖼️"
+    },
+    
+    "80년대 디스코 팝아트 (80s Disco Pop-Art)": {
+        "image_keywords": "Vibrant 80s disco pop art style, neon colors, halftone patterns, funky and energetic, retro groovy aesthetic, bold geometric shapes",
+        "video_keywords": "Dancing lights, disco ball, city neon, retro party",
+        "effects": "Glitch effect, RGB split, strobe lights, chromatic aberration",
+        "transitions": "Glitch transition, whip pan, beat-synced cuts",
+        "description": "화려한 네온 컬러, 에너지 넘치는 레트로 감성",
+        "preview": "🕺"
+    },
+    
+    "한국 민화 모던 (Modern Korean Minhwa)": {
+        "image_keywords": "Modernized Korean Minhwa style, traditional ink and wash brushwork, witty and colorful traditional depiction, Korean folk art aesthetic, vibrant harmonious colors",
+        "video_keywords": "Traditional Korean village, paper texture, nature, joyful feast",
+        "effects": "Ink splash transition, paper overlay, watercolor bleeding",
+        "transitions": "Ink wash wipe, paper tear transition",
+        "description": "전통과 현대가 조화된 한국적 감성",
+        "preview": "🎨"
+    },
+    
+    "지브리 애니메이션 (Studio Ghibli)": {
+        "image_keywords": "Studio Ghibli animation style, hand-drawn cel animation, lush landscapes, soft watercolor textures, nostalgic atmosphere, dreamy and whimsical",
+        "video_keywords": "Nature scenes, countryside, clouds moving, peaceful village",
+        "effects": "Watercolor wash, soft bloom, film grain subtle, dreamy atmosphere",
+        "transitions": "Cloud transition, gentle fade, parallax scrolling",
+        "description": "따뜻하고 섬세한 손그림 애니메이션",
+        "preview": "🌿"
+    },
+    
+    "사이버펑크 2077 (Cyberpunk Noir)": {
+        "image_keywords": "Cyberpunk 2077 style, high-tech noir aesthetic, neon-soaked streets, cinematic lighting, futuristic and gritty digital art, dystopian cityscape",
+        "video_keywords": "Neon city night, rain on street, hologram display, futuristic interface",
+        "effects": "Neon glow, digital glitch, holographic overlay, chromatic aberration",
+        "transitions": "Digital glitch, matrix transition, hologram flicker",
+        "description": "네온과 어둠이 공존하는 미래 도시",
+        "preview": "🌃"
+    },
+    
+    "언리얼 엔진 5 렌더 (UE5 Photorealistic)": {
+        "image_keywords": "Unreal Engine 5 render, hyper-realistic 3D visualization, volumetric lighting, photorealistic textures, ray-traced reflections, movie-like cinematic quality",
+        "video_keywords": "Cinematic camera movement, dramatic lighting, slow motion action",
+        "effects": "Lens flare, depth of field, motion blur, volumetric lighting",
+        "transitions": "Camera pan, dramatic zoom, fade with light leak",
+        "description": "초사실적인 3D 렌더링, 영화 같은 품질",
+        "preview": "💎"
+    },
+    
+    "픽사 3D 애니메이션 (Pixar 3D)": {
+        "image_keywords": "Pixar Disney 3D animation style, expressive character design, vibrant colors, soft ambient lighting, family-friendly aesthetic, rounded shapes",
+        "video_keywords": "Cartoon character, playful animation, bright colors, bouncing movement",
+        "effects": "Cartoon motion blur, exaggerated movement, bounce effect",
+        "transitions": "Bounce transition, pop-in effect, playful wipe",
+        "description": "귀엽고 생동감 넘치는 3D 애니메이션",
+        "preview": "🎬"
+    },
+    
+    "반 고흐 인상파 (Van Gogh Impressionism)": {
+        "image_keywords": "Vincent van Gogh style, post-impressionist brushwork, swirling brushstrokes, vibrant impasto texture, emotional color palette, Starry Night aesthetic",
+        "video_keywords": "Starry night sky, swirling clouds, countryside, sunflower field",
+        "effects": "Oil painting effect, brushstroke overlay, impasto texture",
+        "transitions": "Brush stroke wipe, paint splash transition",
+        "description": "소용돌이치는 붓터치, 감성적 색채",
+        "preview": "🌌"
+    },
+    
+    "일본 우키요에 (Japanese Ukiyo-e)": {
+        "image_keywords": "Japanese Ukiyo-e woodblock print style, bold outlines, flat color blocks, traditional Edo period aesthetic, elegant composition",
+        "video_keywords": "Japanese landscape, waves, Mount Fuji, traditional architecture",
+        "effects": "Woodblock texture, flat colors, bold outlines",
+        "transitions": "Sliding panel transition, wave wipe",
+        "description": "전통 일본 목판화 스타일",
+        "preview": "🗾"
+    },
+    
+    "다크 판타지 (Dark Fantasy)": {
+        "image_keywords": "Dark fantasy illustration, gothic aesthetic, dramatic shadows, mysterious atmosphere, ethereal lighting, medieval dark ages inspiration",
+        "video_keywords": "Dark castle, foggy forest, moonlight, ravens, gothic architecture",
+        "effects": "Dark vignette, fog overlay, light rays, shadow enhancement",
+        "transitions": "Shadow wipe, fade to black, smoke transition",
+        "description": "어둡고 신비로운 판타지 세계관",
+        "preview": "🌑"
+    },
+    
+    "90년대 레트로 애니 (90s Retro Anime)": {
+        "image_keywords": "Retro 90s anime style, nostalgic, cel shading, vibrant colors, City Pop aesthetic, Lo-fi vibe, purple and blue neon lighting, dreamy atmosphere, vintage",
+        "video_keywords": "Retro city night, neon signs, cassette tapes, CRT TV, vintage cars",
+        "effects": "VHS grain, scan lines, color bleeding, lo-fi aesthetic",
+        "transitions": "VHS glitch, scan line wipe, retro fade",
+        "description": "향수를 자극하는 90년대 애니 감성",
+        "preview": "📼"
+    }
 }
+
+
+# ============ AI 자동 추천 매핑 ============
+
+STYLE_AUTO_SELECT = {
+    # 장르 기반
+    "발라드": "반 고흐 인상파 (Van Gogh Impressionism)",
+    "시티팝": "90년대 레트로 애니 (90s Retro Anime)",
+    "힙합/랩": "사이버펑크 2077 (Cyberpunk Noir)",
+    "록/메탈": "다크 판타지 (Dark Fantasy)",
+    "재즈": "반 고흐 인상파 (Van Gogh Impressionism)",
+    "트로트": "한국 민화 모던 (Modern Korean Minhwa)",
+    "EDM/일렉트로닉": "사이버펑크 2077 (Cyberpunk Noir)",
+    "동요/키즈": "픽사 3D 애니메이션 (Pixar 3D)",
+    "클래식 크로스오버": "르네상스 유화 (Renaissance Oil)",
+    "Lo-fi/Chill": "지브리 애니메이션 (Studio Ghibli)",
+    
+    # Vibe 기반
+    "광기/호러": "다크 판타지 (Dark Fantasy)",
+    "슬픈데 신나게": "80년대 디스코 팝아트 (80s Disco Pop-Art)",
+    "웃기지만 진지하게": "90년대 레트로 애니 (90s Retro Anime)",
+}
+
+# 키워드 기반 추천
+KEYWORD_STYLE_MAP = {
+    "디지털": "사이버펑크 2077 (Cyberpunk Noir)",
+    "코드": "사이버펑크 2077 (Cyberpunk Noir)",
+    "네온": "사이버펑크 2077 (Cyberpunk Noir)",
+    "취한": "한국 민화 모던 (Modern Korean Minhwa)",
+    "포장마차": "한국 민화 모던 (Modern Korean Minhwa)",
+    "아멘": "르네상스 유화 (Renaissance Oil)",
+    "교회": "르네상스 유화 (Renaissance Oil)",
+    "하늘": "지브리 애니메이션 (Studio Ghibli)",
+    "구름": "지브리 애니메이션 (Studio Ghibli)",
+    "어둠": "다크 판타지 (Dark Fantasy)",
+    "밤": "다크 판타지 (Dark Fantasy)",
+    "춤": "80년대 디스코 팝아트 (80s Disco Pop-Art)",
+    "디스코": "80년대 디스코 팝아트 (80s Disco Pop-Art)",
+}
+
+
+def analyze_lyrics_for_style(lyrics: str, genre: str, vibe: str) -> str:
+    """가사, 장르, Vibe를 분석하여 최적의 스타일을 추천합니다."""
+    # 1순위: Vibe 기반
+    if vibe in STYLE_AUTO_SELECT:
+        return STYLE_AUTO_SELECT[vibe]
+    
+    # 2순위: 가사 키워드 분석
+    if lyrics:
+        lyrics_lower = lyrics.lower()
+        for keyword, style in KEYWORD_STYLE_MAP.items():
+            if keyword in lyrics_lower:
+                return style
+    
+    # 3순위: 장르 기반
+    if genre in STYLE_AUTO_SELECT:
+        return STYLE_AUTO_SELECT[genre]
+    
+    # 기본값
+    return "지브리 애니메이션 (Studio Ghibli)"
+
 
 VIDEO_MOOD_MAP = {
     "시네마틱 감성 (영화 같은)": "Cinematic and emotional",
@@ -31,100 +190,97 @@ VIDEO_MOOD_MAP = {
     "향수/따뜻한": "Nostalgic and warm"
 }
 
-# 한글 옵션 리스트 (UI 표시용)
-ART_STYLE_OPTIONS = list(ART_STYLE_MAP.keys())
 VIDEO_MOOD_OPTIONS = list(VIDEO_MOOD_MAP.keys())
 
 
-SYSTEM_ROLE = """당신은 세계적인 뮤직비디오 연출가(Director)입니다.
+SYSTEM_ROLE = """당신은 세계적인 뮤직비디오 연출가이자 **2단계 조립 공식(Two-Step Assembly Formula)** 전문가입니다.
 
 ## 당신의 핵심 임무
-가사의 기승전결을 분석하여 20개의 영화적 장면(Scene)을 구성하고,
-각 장면에 대해 **[한글 설명]**, **[이미지 묘사]**, **[카메라/움직임 지시]**를 작성합니다.
+가사의 기승전결을 분석하여 20개의 영화적 장면(Scene)을 구성하고, 각 장면마다 **2단계 조립 공식**을 적용하여 최상의 Midjourney 프롬프트를 생성합니다.
 
-## 출력 형식 (매우 중요! 반드시 준수!)
+## ⭐ 2단계 조립 공식 (Two-Step Assembly Formula) ⭐
+
+### Step 1: Subject Generation (장면 묘사)
+가사 내용을 분석하여 **구체적인 핵심 장면**을 영어로 생성합니다.
+
+**필수 포함 요소:**
+1. **Subject (주체)**: 캐릭터 외형, 옷차림, 자세, 표정
+2. **Environment (환경)**: 장소, 날씨, 시간대, 구체적 디테일
+3. **Lighting & Color**: 조명 방향, 색온도, 분위기
+4. **Composition**: 카메라 각도, 구도
+
+**예시:**
+```
+A melancholic girl in white dress standing under flickering streetlight, 
+tear-stained cheeks glistening, hands loosely hanging, wet streets reflecting 
+neon signs in purple and blue, rain creating ripples in puddles
+```
+
+### Step 2: Style Integration (스타일 결합)
+**Step 1의 장면 묘사는 그대로 유지**하고, 뒤에 스타일 키워드만 추가합니다.
+
+**공식:**
+```
+[Step 1 장면 묘사] + ", " + [Style Keywords]
+```
+
+**⚠️ 중요: Step 1을 절대 수정하지 마세요! 뒤에 추가만 하세요!**
+
+## 출력 형식 (매우 중요!)
 
 ### 구분자 규칙:
-- **장면과 장면 사이**: `|||` (파이프 3개)로 구분
-- **한글 설명과 이미지 묘사 사이**: `###` (샵 3개)로 구분
-- **이미지 묘사와 모션 묘사 사이**: `@@@` (골뱅이 3개)로 구분
+- **장면과 장면 사이**: `|||` (파이프 3개)
+- **한글 설명과 이미지 묘사 사이**: `###` (샵 3개)
+- **이미지 묘사와 모션 묘사 사이**: `@@@` (골뱅이 3개)
 
 ### 출력 예시:
-빗속에서 슬픈 표정으로 서 있는 소녀 ### A melancholic girl standing in rain, emotional expression, wet streets @@@ Slow zoom in, rain falling ||| 하늘을 올려다보며 희망을 품는 모습 ### She looks up at sky, hope in eyes @@@ Camera pans upward ||| ...
+```
+빗속에서 슬픈 표정으로 서 있는 소녀 ### A melancholic girl in white dress standing under flickering streetlight, tear-stained cheeks glistening, hands loosely hanging, wet streets reflecting neon signs in purple and blue, rain creating ripples in puddles @@@ Slow zoom in from medium shot to close-up, rain falling diagonally across frame ||| 하늘을 올려다보며 희망을 품는 모습 ### She tilts head upward gazing at dark stormy clouds, hopeful expression with slight smile, single ray of golden sunlight breaking through clouds @@@ Camera pans upward smoothly following her gaze |||
+```
 
-### 한글 설명 작성 규칙:
-1. 해당 장면의 핵심 내용을 한 문장으로 요약
-2. 사용자가 장면을 쉽게 이해할 수 있도록 구체적으로
-3. 20-30자 내외로 간결하게
-4. 가사의 감정과 스토리를 반영
+## 이미지 묘사 작성 규칙 (Step 1)
 
-### 이미지 묘사 작성 규칙 (Midjourney 최적화):
-**⚠️ 추상적 표현 금지! 구체적 시각 정보만 사용!**
+### 필수 포함:
+1. **구체적 시각 정보만** (추상적 표현 금지)
+   - ❌ "슬픈 소녀" → ✅ "Girl with tear-stained cheeks, slouched posture"
+   
+2. **감각적 디테일**
+   - 조명: "golden hour sunlight", "neon glow", "candlelight"
+   - 색감: "warm orange tones", "cool blue atmosphere"
+   - 질감: "rain-streaked glass", "worn leather jacket"
 
-#### 필수 포함 요소 (Subject-Environment-Lighting-Composition):
+3. **구도와 앵글**
+   - "close-up portrait", "wide angle view", "bird's eye view"
 
-1. **Subject (주체)**: 캐릭터의 외형, 옷차림, 자세, 표정
-   - ❌ 나쁜 예: "슬픈 소녀"
-   - ✅ 좋은 예: "A girl in white dress, tear-stained cheeks, hands covering face, slouched posture"
+4. **가사 연출 지시어 반영**
+   - `(Piano intro)` → "grand piano with keys visible, spotlight on piano"
+   - `(Build up)` → "dynamic composition, dramatic lighting, tension"
 
-2. **Environment (환경)**: 장소의 구체적 디테일, 날씨, 계절감, 시간대
-   - ❌ 나쁜 예: "도시 배경"
-   - ✅ 좋은 예: "Rain-soaked city street at midnight, neon signs reflecting on wet pavement, empty bus stop"
+### ⚠️ 주의사항:
+- 영어로 작성 (Midjourney 최적화)
+- **스타일 키워드는 절대 포함하지 마세요!** (시스템이 Step 2에서 자동 추가)
 
-3. **Lighting & Color (조명과 색감)**: 빛의 방향, 색온도, 그림자 강도
-   - ❌ 나쁜 예: "따뜻한 조명"
-   - ✅ 좋은 예: "Golden hour sunlight filtering through curtains, warm orange glow, soft shadows"
-   - ❌ 나쁜 예: "네온 조명"
-   - ✅ 좋은 예: "Neon purple and cyan lights, high contrast, vibrant color bleeding, cinematic glow"
+## 모션 묘사 작성 규칙
 
-4. **Composition (구도)**: 카메라 각도와 렌즈 느낌
-   - 예: "Close-up shot", "Wide angle view", "Low angle looking up", "Cinematic depth of field"
+1. 카메라 움직임: zoom in/out, pan, tilt, dolly
+2. 피사체 동작: walking, turning, reaching out
+3. 환경 효과: rain falling, wind blowing
+4. 영어로 작성 (Kling/Runway 최적화)
 
-5. **가사 연출 지시어 반영** (매우 중요!):
-   - 가사에 `(Piano intro)`가 있으면 → "grand piano with keys visible, spotlight on piano"
-   - 가사에 `(Guitar solo)`가 있으면 → "electric guitar glowing in neon light, strings vibrating"
-   - 가사에 `(Build up)`이 있으면 → "dynamic composition, dramatic lighting, tension in posture"
-   - 가사에 `(Emotional cry)`가 있으면 → "intense facial expression, tears streaming, dramatic close-up"
-   - 가사에 `(Fade out)`이 있으면 → "soft focus, dimming lights, peaceful atmosphere"
-
-#### 주의사항:
-- **영어로 작성** (Midjourney 최적화)
-- **아트 스타일은 포함하지 마세요** (시스템이 자동으로 추가합니다)
-- **한-영 직역 금지**: Midjourney가 이해하기 쉬운 구체적 명사와 형용사 조합으로 변환
-
-### 모션 묘사 작성 규칙:
-1. 카메라 움직임 (zoom in/out, pan, tilt, dolly)
-2. 피사체의 동작 (walking, turning, reaching out)
-3. 환경 효과 (rain falling, wind blowing)
-4. **영어로 작성** (Kling/Runway 최적화)
-
-### 20개 장면 구성:
-- Scene 1-3: 도입부 (Intro) - 가사의 `[Intro]` 파트 반영
-- Scene 4-7: 전개 1 (Verse 1) - 가사의 `[Verse 1]` 파트 반영
-- Scene 8-11: 고조 1 (Chorus 1) - 가사의 `[Chorus]` 파트 반영
-- Scene 12-14: 전개 2 (Verse 2/Bridge) - 가사의 `[Verse 2]` 또는 `[Bridge]` 반영
-- Scene 15-18: 클라이맥스 (Chorus 2/Final) - 가사의 후반부 `[Chorus]` 반영
-- Scene 19-20: 마무리 (Outro) - 가사의 `[Outro]` 파트 반영
+## 20개 장면 구성:
+- Scene 1-3: 도입부 (Intro)
+- Scene 4-7: 전개 1 (Verse 1)
+- Scene 8-11: 고조 1 (Chorus 1)
+- Scene 12-14: 전개 2 (Verse 2/Bridge)
+- Scene 15-18: 클라이맥스 (Chorus 2/Final)
+- Scene 19-20: 마무리 (Outro)
 
 ## 절대 규칙
-1. 정확히 20개의 장면을 생성
+1. 정확히 20개의 장면 생성
 2. 각 장면은 `|||`로 구분
 3. 한글설명, 이미지, 모션은 각각 `###`, `@@@`로 구분
-4. 가사의 실제 내용과 감정을 반영
-5. 모든 이미지/모션 묘사는 **영어**로
-6. **아트 스타일/화풍은 묘사에 포함하지 말 것!**
-7. **한글 설명을 절대 생략하지 말 것!**
-
-## 올바른 출력 예시 (구체적 묘사!)
-
-빗속에서 슬픈 표정으로 서 있는 소녀 ### A melancholic girl in soaked white dress standing under flickering streetlight, tear-stained cheeks glistening, hands loosely hanging, wet streets reflecting neon signs in purple and blue, rain creating ripples in puddles @@@ Slow zoom in from medium shot to close-up, rain falling diagonally across frame, shallow depth of field on girl's face ||| 하늘을 올려다보며 희망을 품는 모습 ### She tilts head upward gazing at dark stormy clouds, hopeful expression with slight smile, single ray of golden sunlight breaking through clouds, dramatic sky composition, wind blowing her hair @@@ Camera pans upward smoothly following her gaze, lens flare effect from sunlight, birds flying in background ||| 손을 뻗어 빗방울을 받는 장면 ### Extreme close-up of delicate hand reaching out with palm open, individual raindrops catching ambient light and creating sparkles, blurred background of city lights in bokeh, gentle graceful gesture @@@ Macro shot focusing on hand, rain drops in slow motion, soft focus transition from hand to background
-
-## 잘못된 예시 (이렇게 하지 마세요!)
-❌ A melancholic girl @@@ Slow zoom in (너무 단순, 환경/조명 없음)
-❌ 따뜻한 분위기의 소녀 ### warm atmosphere girl (추상적, 비영어, 구체성 없음)
-❌ 아름다운 장면 ### beautiful scene with emotional feeling (추상적 형용사만 나열)
-❌ ### 구분자 없이 바로 영어 시작 (형식 위반)
-❌ 한글설명 없이 영어만 나열 (한글 설명 필수)"""
+4. **이미지 묘사에 스타일 키워드 포함 금지** (시스템이 자동 추가)
+5. 구체적 시각 정보만 사용 (추상적 표현 금지)"""
 
 
 def parse_scenes(gpt_response: str) -> list:
@@ -174,23 +330,24 @@ def parse_scenes(gpt_response: str) -> list:
 def render(client):
     """스토리보드 탭을 렌더링합니다."""
     
-    st.header("🎬 Step 3: 스토리보드 & 프롬프트 생성")
+    st.header("🎬 Step 3: 스토리보드 & 이미지 프롬프트 생성")
     st.markdown("""
-    가사를 분석하여 **10개 장면**의 프롬프트를 생성합니다.
+    가사를 분석하여 **20개 장면**의 초고품질 이미지 프롬프트를 생성합니다.
     
-    > 🎥 *"Midjourney 이미지 프롬프트 + Kling/Runway 모션 프롬프트를 한 번에!"*
+    > 🎥 *"2단계 조립 공식 + AI 스타일 추천 + 영상 편집 레시피"*
     """)
     
     st.success("""
-    ✨ **이 탭에서 생성되는 것들:**
-    1. **🖼️ Midjourney 프롬프트** - `--cref`로 캐릭터 일관성 유지
-    2. **🎥 Motion 프롬프트** - Kling, Runway, Pika용
-    3. **📖 한글 장면 설명** - 각 장면의 내용을 쉽게 파악
+    ✨ **NEW 업그레이드:**
+    1. 🤖 **AI 자동 추천** - 가사 분석으로 최적 스타일 선택
+    2. 🎨 **10가지+ 독특한 스타일** - 르네상스부터 사이버펑크까지
+    3. 🔧 **2단계 조립 공식** - 장면 묘사 + 스타일 결합
+    4. 🎬 **영상 편집 레시피** - 스톡 영상, 효과, 전환 가이드
     """)
     
     st.divider()
     
-    # ============ 입력 영역 (모바일 반응형) ============
+    # ============ 가사 입력 ============
     st.subheader("📝 가사 입력")
     default_lyrics = st.session_state.get("lyrics", "")
     
@@ -207,38 +364,78 @@ def render(client):
     
     st.divider()
     
-    st.subheader("🔗 마스터 이미지 URL")
+    # ============ 마스터 이미지 URL ============
+    st.subheader("🔗 마스터 이미지 URL (선택)")
     default_url = st.session_state.get("master_image_url", "")
     
     master_url = st.text_input(
         "캐릭터 참조용 이미지 URL",
         value=default_url,
         placeholder="https://cdn.midjourney.com/...",
-        help="Tab 2에서 Midjourney로 생성한 캐릭터 이미지 URL"
+        help="Tab 2에서 생성한 캐릭터 이미지 URL (선택사항)"
     )
     
     if default_url:
         st.caption("💡 Tab 2에서 저장한 URL이 불러와졌습니다.")
     else:
-        st.warning("⚠️ 마스터 이미지 URL이 없습니다.")
+        st.info("💡 URL이 없어도 괜찮습니다! 스타일만으로도 일관성 있는 이미지가 생성됩니다.")
     
     st.divider()
     
-    # ============ 아트 스타일 (한글 매핑) ============
-    st.subheader("🎨 아트 스타일")
+    # ============ 스타일 선택 ============
+    st.subheader("🎨 비주얼 스타일")
     
-    art_style_kr = st.selectbox(
-        "일관된 아트 스타일 선택",
-        options=ART_STYLE_OPTIONS,
-        help="모든 20개 장면에 동일하게 적용됩니다"
+    # 현재 장르/Vibe 가져오기
+    current_genre = st.session_state.get("lyrics_genre", "")
+    current_vibe = st.session_state.get("lyrics_vibe", "")
+    
+    # AI 자동 추천 스타일
+    auto_recommended = None
+    if current_genre or current_vibe or lyrics_input:
+        auto_recommended = analyze_lyrics_for_style(lyrics_input, current_genre, current_vibe)
+        st.success(f"🤖 **AI 추천 스타일:** {auto_recommended}")
+        
+        if current_genre:
+            st.caption(f"📊 분석 근거: 장르({current_genre}), Vibe({current_vibe})")
+        
+        # 키워드 발견 표시
+        if lyrics_input:
+            found_keywords = [kw for kw in KEYWORD_STYLE_MAP.keys() if kw in lyrics_input.lower()]
+            if found_keywords:
+                st.caption(f"🔍 가사 키워드 발견: {', '.join(found_keywords[:3])}")
+    
+    # 스타일 선택
+    style_options = list(STYLE_GUIDE.keys())
+    
+    selected_style = st.selectbox(
+        "이미지 스타일 선택",
+        options=style_options,
+        help="'AI 자동 추천'을 선택하면 가사 분석 결과가 자동 적용됩니다"
     )
     
-    # 선택된 영어값 미리보기
-    st.caption(f"🔤 영어값: `{ART_STYLE_MAP[art_style_kr][:35]}...`")
+    # 선택된 스타일 정보 표시
+    if selected_style != "AI 자동 추천":
+        style_info = STYLE_GUIDE[selected_style]
+        
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            st.markdown(f"### {style_info['preview']}")
+        with col2:
+            st.markdown(f"**{selected_style}**")
+            st.caption(style_info['description'])
+    
+    # 스타일 미리보기
+    with st.expander("🎨 모든 스타일 미리보기"):
+        for style_name, style_data in STYLE_GUIDE.items():
+            if style_name == "AI 자동 추천":
+                continue
+            st.markdown(f"{style_data['preview']} **{style_name}**")
+            st.caption(style_data['description'])
+            st.divider()
     
     st.divider()
     
-    # ============ 영상 분위기 (한글 매핑) ============
+    # ============ 영상 분위기 ============
     st.subheader("🎥 영상 분위기")
     
     video_mood_kr = st.selectbox(
@@ -251,7 +448,7 @@ def render(client):
     st.divider()
     
     # ============ 생성 버튼 ============
-    if st.button("🎬 20개 장면 프롬프트 생성", type="primary", use_container_width=True):
+    if st.button("🎬 20개 장면 이미지 프롬프트 생성", type="primary", use_container_width=True):
         if not lyrics_input.strip():
             st.error("가사를 입력해주세요.")
             return
@@ -259,61 +456,80 @@ def render(client):
             st.error("API 키가 설정되지 않았습니다.")
             return
         
-        # URL 없으면 경고만 표시 (중단하지 않음)
-        if not master_url.strip():
-            st.warning("⚠️ 마스터 이미지 URL이 없어 캐릭터 일관성이 보장되지 않습니다.")
+        # 최종 스타일 결정
+        if selected_style == "AI 자동 추천":
+            if auto_recommended:
+                final_style = auto_recommended
+            else:
+                final_style = "지브리 애니메이션 (Studio Ghibli)"
+            st.info(f"🤖 AI가 선택한 스타일: **{final_style}**")
+        else:
+            final_style = selected_style
         
-        # ============ 영어값 변환 (핵심!) ============
-        art_style_en = ART_STYLE_MAP[art_style_kr]
+        # 스타일 데이터 가져오기
+        style_data = STYLE_GUIDE[final_style]
+        style_keywords = style_data["image_keywords"]
         video_mood_en = VIDEO_MOOD_MAP[video_mood_kr]
         
-        user_prompt = f"""다음 가사를 분석하여 뮤직비디오용 20개 장면의 프롬프트를 작성해주세요.
+        # 사용자 프롬프트 구성
+        user_prompt = f"""다음 가사를 분석하여 뮤직비디오용 20개 장면의 이미지 프롬프트를 **2단계 조립 공식**에 따라 작성해주세요.
 
 ## 가사
 {lyrics_input}
 
-## 스타일 정보
-- 영상 분위기: {video_mood_en}
+## 영상 분위기
+{video_mood_en}
 
-## ⚠️ 매우 중요한 출력 형식 ⚠️
+## ⭐ 중요 지시사항 ⭐
 
-각 장면은 **반드시** 다음 구조로 작성하세요:
-1. 한글 설명 (20-40자) ← 절대 생략 금지!
-2. ### (구분자)
-3. 영어 이미지 묘사
-4. @@@ (구분자)  
-5. 영어 모션 묘사
+**각 장면마다 2단계 조립 공식을 적용하세요:**
 
-장면 사이는 ||| 로 구분합니다.
+### Step 1: Subject Generation
+- 가사 내용을 구체적 시각 정보로 변환
+- 주체, 환경, 조명, 구도 모두 포함
+- **스타일 키워드는 절대 포함하지 마세요!**
 
-## 출력 예시 (반드시 이 형식을 따라주세요!)
+### Step 2: Style Integration (시스템이 자동 처리)
+- 시스템이 각 장면 뒤에 다음 스타일을 자동 추가합니다:
+- Style Keywords: {style_keywords}
 
-어두운 방에서 혼란스러워하는 남자 ### A man standing in a dark room, surrounded by glowing symbols @@@ Slow zoom in, symbols flickering ||| 불타는 동전을 들고 절망하는 모습 ### Hands holding a melting coin in fiery inferno @@@ Camera pulls back ||| ...
+## 출력 형식 (정확히 준수!)
 
-⚠️ 주의사항:
-- 한글 설명은 **절대 생략하지 마세요**
-- 각 장면 앞에 **반드시 한글 설명 + ###** 이 있어야 합니다
-- 아트 스타일은 묘사에 포함하지 마세요
-- 다른 설명 없이 위 형식으로만 출력하세요
+각 장면:
+```
+한글 설명 (20-30자) ### 영어 장면 묘사 (Step 1만, 스타일 제외) @@@ 영어 모션 묘사
+```
 
-지금 바로 정확히 20개 장면을 위 형식으로 생성해주세요!"""
+장면 구분자: `|||`
 
-        with st.spinner("🎬 스토리보드를 기획하고 있습니다... (약 1~2분)"):
+## 예시:
+```
+빗속에서 슬픈 표정으로 서 있는 소녀 ### A melancholic girl in white dress standing under flickering streetlight, tear-stained cheeks glistening, wet streets reflecting neon signs @@@ Slow zoom in, rain falling ||| 하늘을 올려다보며 희망을 품는 모습 ### She tilts head upward gazing at dark clouds, hopeful expression, sunlight breaking through @@@ Camera pans upward |||
+```
+
+⚠️ 주의:
+- 이미지 묘사에 스타일 키워드 포함 금지!
+- 구체적 시각 정보만 사용
+- 정확히 20개 장면 생성
+
+지금 바로 20개 장면을 위 형식으로 생성해주세요!"""
+
+        with st.spinner("🎬 AI가 20개 장면을 분석하고 있습니다... (약 1-2분)"):
             try:
                 result = get_gpt_response(client, SYSTEM_ROLE, user_prompt)
                 
-                # 세션 스테이트에 저장 (한글/영어 모두)
+                # 세션 스테이트에 저장
                 st.session_state["storyboard_raw"] = result
                 st.session_state["storyboard_url"] = master_url
-                st.session_state["storyboard_style"] = art_style_en  # 영어값
-                st.session_state["storyboard_style_kr"] = art_style_kr  # 한글값
-                st.session_state["storyboard_video_mood"] = video_mood_en  # 영어값
-                st.session_state["storyboard_video_mood_kr"] = video_mood_kr  # 한글값
+                st.session_state["storyboard_style"] = final_style
+                st.session_state["storyboard_video_mood"] = video_mood_en
+                st.session_state["storyboard_video_mood_kr"] = video_mood_kr
                 
-                st.success("🎉 스토리보드가 생성되었습니다!")
+                st.success("🎉 20개 장면 이미지 프롬프트가 생성되었습니다!")
+                st.rerun()
                 
             except Exception as e:
-                st.error(str(e))
+                st.error(f"오류 발생: {str(e)}")
                 return
     
     # ============ 결과 표시 ============
@@ -324,68 +540,76 @@ def render(client):
         
         # 저장된 값 불러오기
         master_url = st.session_state.get("storyboard_url", "")
-        art_style_en = st.session_state.get("storyboard_style", "")
-        art_style_kr = st.session_state.get("storyboard_style_kr", art_style_en)
+        final_style = st.session_state.get("storyboard_style", "")
+        style_data = STYLE_GUIDE.get(final_style, {})
+        style_keywords = style_data.get("image_keywords", "")
         
-        # 적용 파라미터 안내 (URL 있을 때와 없을 때 구분)
-        if master_url:
-            st.info(f"""
-            📌 **적용된 설정 (모든 장면에 동일하게 적용):**
-            - 🎨 스타일: **{art_style_kr}**
-            - 🔗 캐릭터 참조: `--cref {master_url[:40]}...`
-            - 📐 화면 비율: `--ar 16:9`
-            """)
-        else:
-            st.warning(f"""
-            📌 **적용된 설정 (모든 장면에 동일하게 적용):**
-            - 🎨 스타일: **{art_style_kr}**
-            - ⚠️ 캐릭터 참조: **없음** (--cref 미적용)
-            - 📐 화면 비율: `--ar 16:9`
-            
-            💡 캐릭터 일관성이 보장되지 않습니다. Tab 2에서 마스터 이미지를 생성하면 더 좋은 결과를 얻을 수 있습니다.
-            """)
+        # 적용 설정 안내
+        st.info(f"""
+        📌 **적용된 설정:**
+        - 🎨 스타일: **{final_style}**
+        - 🎬 분위기: **{st.session_state.get('storyboard_video_mood_kr', '-')}**
+        - 🔗 캐릭터 참조: {'있음 (--cref 적용)' if master_url else '없음'}
+        - 📐 화면 비율: `--ar 16:9`
+        """)
         
         # GPT 결과 파싱
         scenes = parse_scenes(st.session_state["storyboard_raw"])
         
         if len(scenes) == 0:
             st.error("장면 파싱에 실패했습니다. 다시 생성해주세요.")
-            with st.expander("🔍 원본 데이터 확인"):
-                st.text(st.session_state["storyboard_raw"])
             return
         
-        st.caption(f"✅ {len(scenes)}개 장면이 파싱되었습니다.")
+        st.caption(f"✅ {len(scenes)}개 장면이 생성되었습니다.")
         
-        # ============ 최종 프롬프트 조립 (이미지 일관성 강제!) ============
+        st.divider()
+        
+        # ============ 최종 프롬프트 조립 (2단계 공식 적용) ============
+        st.subheader("🔧 2단계 조립 공식 적용 결과")
+        st.markdown("""
+        각 장면의 이미지 프롬프트는 **2단계 조립 공식**으로 생성되었습니다:
+        - **Step 1**: 가사 → 구체적 장면 묘사
+        - **Step 2**: Step 1 + 스타일 키워드
+        """)
+        
         final_prompts = []
         
-        for i, scene in enumerate(scenes[:20], 1):  # 10개 → 20개
+        for i, scene in enumerate(scenes[:20], 1):
             with st.expander(f"🎬 Scene {i}", expanded=(i <= 3)):
                 
-                # ★ 한글 설명 먼저 표시 (핵심 수정 사항!)
+                # 한글 설명
                 if scene.get('korean_desc'):
                     st.info(f"📖 **장면 설명:** {scene['korean_desc']}")
                 
-                # ★★★ 프롬프트 조립 공식 (핵심!) ★★★
-                # 포맷: /imagine prompt: {스타일}, {장면묘사} [--cref {URL}] --ar 16:9
-                # URL 있으면 --cref 포함, 없으면 제외
-                if master_url:
-                    midjourney_prompt = f"/imagine prompt: {art_style_en}, {scene['image_prompt']} --cref {master_url} --ar 16:9"
-                else:
-                    midjourney_prompt = f"/imagine prompt: {art_style_en}, {scene['image_prompt']} --ar 16:9"
+                # Step 1: 장면 묘사
+                st.markdown("**🎬 Step 1: 장면 묘사 (Subject Generation)**")
+                st.code(scene['image_prompt'], language=None)
                 
-                st.markdown("**🖼️ Midjourney 이미지 프롬프트:**")
+                # Step 2: 최종 프롬프트 (스타일 결합)
+                st.markdown("**✨ Step 2: 최종 Midjourney 프롬프트 (Style Integration)**")
+                
+                # 2단계 조립: Step 1 + 스타일 키워드
+                step2_prompt = f"{scene['image_prompt']}, {style_keywords}"
+                
+                # --cref 추가 (URL 있을 때만)
+                if master_url:
+                    midjourney_prompt = f"/imagine prompt: {step2_prompt} --cref {master_url} --ar 16:9"
+                else:
+                    midjourney_prompt = f"/imagine prompt: {step2_prompt} --ar 16:9"
+                
                 st.code(midjourney_prompt, language=None)
                 
-                st.markdown("**🎥 Motion 프롬프트 (Kling/Runway/Pika용):**")
+                # Motion 프롬프트
+                st.markdown("**🎥 Motion 프롬프트 (Kling/Runway)**")
                 st.success(f"🎬 {scene['motion_prompt']}")
                 
                 final_prompts.append({
                     "scene": i,
                     "korean_desc": scene.get('korean_desc', ''),
+                    "step1_scene": scene['image_prompt'],
+                    "step2_final": step2_prompt,
                     "midjourney": midjourney_prompt,
-                    "motion": scene['motion_prompt'],
-                    "image_desc": scene['image_prompt']
+                    "motion": scene['motion_prompt']
                 })
         
         # 세션에 최종 프롬프트 저장
@@ -393,68 +617,131 @@ def render(client):
         
         st.divider()
         
+        # ============ 영상 편집 레시피 ============
+        st.subheader("🎬 영상 편집 레시피")
+        
+        if style_data:
+            tab1, tab2, tab3 = st.tabs([
+                "📹 스톡 영상 키워드",
+                "✨ 특수 효과 & 전환",
+                "📋 통합 레시피"
+            ])
+            
+            with tab1:
+                st.markdown("### 📹 추천 스톡 영상 검색 키워드")
+                st.success("🔍 **무료 스톡 영상 사이트:** Pexels, Pixabay, Videvo, Mixkit")
+                
+                if style_data.get("video_keywords"):
+                    keywords = style_data["video_keywords"]
+                    st.code(keywords, language=None)
+                    st.caption("👆 위 키워드로 스톡 영상을 검색하세요")
+            
+            with tab2:
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.markdown("### ✨ 특수 효과")
+                    if style_data.get("effects"):
+                        st.info(style_data["effects"])
+                
+                with col2:
+                    st.markdown("### 🔄 화면 전환")
+                    if style_data.get("transitions"):
+                        st.warning(style_data["transitions"])
+            
+            with tab3:
+                st.markdown("### 📋 완전한 편집 가이드")
+                
+                recipe = f"""# {final_style} - 편집 레시피
+
+## 🎨 스타일
+{final_style}
+
+## 📹 스톡 영상 키워드
+{style_data.get('video_keywords', '-')}
+
+## ✨ 특수 효과
+{style_data.get('effects', '-')}
+
+## 🔄 화면 전환
+{style_data.get('transitions', '-')}
+
+## 🎯 사용 방법
+1. 위 키워드로 무료 스톡 영상 다운로드
+2. 프리미어/다빈치 리졸브에서 편집
+3. 추천 효과와 전환 적용
+4. 음악과 싱크 맞추기
+"""
+                st.text_area("전체 레시피", value=recipe, height=300)
+        
+        st.divider()
+        
         # ============ 전체 프롬프트 복사 섹션 ============
         st.subheader("📋 전체 프롬프트 (복사용)")
         
         tab_mj, tab_motion, tab_all = st.tabs([
-            "🖼️ Midjourney 전체", 
-            "🎥 Motion 전체", 
+            "🖼️ Midjourney 전체",
+            "🎥 Motion 전체",
             "📄 통합 전체"
         ])
         
         with tab_mj:
             st.markdown("**Midjourney Discord에 순서대로 붙여넣기:**")
-            all_mj_prompts = "\n\n".join([
+            all_mj = "\n\n".join([
                 f"# Scene {p['scene']}: {p['korean_desc']}\n{p['midjourney']}"
                 for p in final_prompts
             ])
-            st.text_area("MJ 프롬프트", value=all_mj_prompts, height=400, label_visibility="collapsed")
+            st.text_area("MJ 프롬프트", value=all_mj, height=400, label_visibility="collapsed")
         
         with tab_motion:
-            st.markdown("**Kling/Runway/Pika에 사용할 모션 프롬프트:**")
-            all_motion_prompts = "\n\n".join([
+            st.markdown("**Kling/Runway에서 사용:**")
+            all_motion = "\n\n".join([
                 f"# Scene {p['scene']}: {p['korean_desc']}\n{p['motion']}"
                 for p in final_prompts
             ])
-            st.text_area("Motion 프롬프트", value=all_motion_prompts, height=400, label_visibility="collapsed")
+            st.text_area("Motion", value=all_motion, height=400, label_visibility="collapsed")
         
         with tab_all:
-            st.markdown("**전체 데이터 (한글설명 + 이미지 + 모션):**")
-            all_prompts = "\n\n".join([
+            st.markdown("**전체 데이터:**")
+            all_data = "\n\n".join([
                 f"{'='*50}\n🎬 SCENE {p['scene']}\n{'='*50}\n\n"
                 f"[한글 설명]\n{p['korean_desc']}\n\n"
+                f"[Step 1: 장면 묘사]\n{p['step1_scene']}\n\n"
+                f"[Step 2: 최종 프롬프트]\n{p['step2_final']}\n\n"
                 f"[Midjourney]\n{p['midjourney']}\n\n"
                 f"[Motion]\n{p['motion']}"
                 for p in final_prompts
             ])
-            st.text_area("전체 프롬프트", value=all_prompts, height=400, label_visibility="collapsed")
+            st.text_area("통합", value=all_data, height=400, label_visibility="collapsed")
         
         # 완료 안내
         st.divider()
         st.success("""
-        🎉 **모든 준비가 완료되었습니다!**
+        🎉 **모든 프롬프트가 생성되었습니다!**
         
         **다음 단계:**
-        1. **Midjourney 프롬프트**를 Discord에서 실행 → 20개 이미지 생성
-        2. 생성된 이미지를 **Kling/Runway/Pika**에 업로드
-        3. 각 이미지에 해당하는 **Motion 프롬프트** 입력 → 영상 생성
-        4. 20개 영상 클립을 편집 소프트웨어에서 조합 → 뮤직비디오 완성! 🎬
-        """)
+        1. 📸 **Midjourney 프롬프트** 복사 → Discord에서 20개 이미지 생성
+        2. 📹 **스톡 영상** 다운로드 (추천 키워드 사용)
+        3. 🎬 **Kling/Runway**에 이미지 업로드 + Motion 프롬프트 적용
+        4. ✂️ **영상 편집** (편집 레시피 참고)
+        5. 🎵 **음악 합성** (Suno/Udio 가사)
+        6. 🚀 **유튜브 업로드**
         
-        with st.expander("🔍 원본 GPT 응답 확인 (디버깅용)"):
-            st.text(st.session_state["storyboard_raw"])
+        💡 **무료 스톡 영상:**
+        - Pexels: https://www.pexels.com/videos/
+        - Pixabay: https://pixabay.com/videos/
+        - Videvo: https://www.videvo.net/
+        """)
     
     else:
         st.markdown("---")
         st.markdown("""
         ### 🚀 시작하기
         
-        1. **가사**를 입력하세요 (Tab 1에서 생성했다면 자동으로 불러옵니다)
-        2. **마스터 이미지 URL**을 입력하세요 (선택사항, 없으면 캐릭터 일관성은 보장 안 됨)
-        3. **아트 스타일**과 **영상 분위기**를 선택하세요
-        4. **생성 버튼**을 클릭하면 20개 장면의 프롬프트가 만들어집니다!
+        1. **가사 입력** (Tab 1에서 자동 불러오기)
+        2. **스타일 선택** (AI 자동 추천 또는 직접 선택)
+        3. **생성 버튼 클릭**
+        4. **20개 초고품질 이미지 프롬프트 받기!**
         
-        > 💡 마스터 이미지 URL이 있으면 모든 장면에서 **캐릭터 일관성**이 유지됩니다!
-        > 
-        > 💡 없어도 가사만으로 이미지 프롬프트 생성이 가능하지만, 캐릭터가 장면마다 달라질 수 있습니다.
+        > 💡 2단계 조립 공식으로 장면 묘사 + 스타일이 완벽하게 결합됩니다!
         """)
