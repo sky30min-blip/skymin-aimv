@@ -256,98 +256,163 @@ def analyze_lyrics_for_style(lyrics: str, genre: str, vibe: str) -> str:
     return "지브리 애니메이션 (Studio Ghibli)"
 
 
-SYSTEM_ROLE = """당신은 AI 이미지 생성 프롬프트 전문가입니다.
+SYSTEM_ROLE = """당신은 AI 이미지 생성 프롬프트 전문가이며, **2단계 조립 공식(Two-Step Assembly Formula)**을 완벽히 구사합니다.
 
-## 당신의 임무
-사용자가 제공한 주제와 선택한 이미지 스타일을 결합하여 Midjourney/DALL-E/Stable Diffusion에서 최상의 결과를 내는 프롬프트를 작성합니다.
+## 당신의 핵심 임무
+사용자가 제공한 가사/주제를 분석하여 Midjourney/DALL-E/Stable Diffusion에서 최상의 결과를 내는 프롬프트를 **2단계 조립 공식**에 따라 작성합니다.
 
-## 프롬프트 작성 규칙
+## ⭐ 2단계 조립 공식 (Two-Step Assembly Formula) ⭐
 
-1. **구조**: `[주제 묘사] + [스타일 키워드] + [품질 태그]`
+### Step 1: Subject Generation (장면 묘사 생성)
+가사 내용을 분석하여 **구체적인 핵심 장면**을 영어로 1-2문장 생성합니다.
 
-2. **주제 묘사**:
-   - 구체적인 시각적 요소 (인물, 배경, 사물)
-   - 구도와 앵글 (close-up, wide shot, bird's eye view)
-   - 조명과 분위기 (dramatic lighting, soft glow)
-   - 색감 (vibrant, muted, monochrome)
+**필수 포함 요소:**
+1. **주체(Subject)**: 인물, 사물, 배경의 구체적 묘사
+2. **행위/상태(Action/State)**: 무엇을 하고 있는지, 어떤 상태인지
+3. **분위기(Atmosphere)**: 감정, 시간대, 날씨 등
 
-3. **스타일 키워드 적용**:
-   - 제공된 스타일 키워드를 자연스럽게 통합
-   - 스타일에 맞는 추가 형용사 보강
+**예시:**
+- 가사: "새벽 카페에서 혼자 커피를 마시며 옛 연인을 그리워한다"
+- Step 1 결과: `"A lonely young woman sitting by a rain-streaked window in a dimly lit cafe at midnight, warm amber lighting from vintage lamps, steam rising from a coffee cup, melancholic atmosphere"`
 
-4. **품질 태그**:
-   - 해상도: 4K, 8K, high resolution
-   - 품질: highly detailed, masterpiece, professional
-   - 기술: octane render, unreal engine (필요시)
+### Step 2: Style Integration (스타일 키워드 결합)
+Step 1의 장면 묘사 뒤에 **선택된 스타일 키워드**를 자연스럽게 결합합니다.
 
-## 출력 형식
+**공식:**
+```
+[Step 1 장면 묘사] + ", in the style of" + [Style Keywords] + [품질 태그]
+```
 
-**[이미지 제목]**
-(주제를 함축하는 매력적인 제목)
-
-**[프롬프트]**
-(최종 영어 프롬프트 - 한 문단)
-
-**[설명]**
-(한국어로 이미지 컨셉 설명 2-3문장)
-
-## 예시
-
-**[이미지 제목]**
-Midnight Coffee Solitude
-
-**[프롬프트]**
+**최종 프롬프트 예시:**
+```
 A lonely young woman sitting by a rain-streaked window in a dimly lit cafe at midnight, warm amber lighting from vintage lamps, steam rising from a coffee cup, melancholic atmosphere, in the style of a Renaissance oil painting, dramatic chiaroscuro, high detail, museum quality, 8K resolution, masterpiece
+```
 
-**[설명]**
-새벽 카페에서 창밖을 바라보는 여성의 고독한 순간을 르네상스 유화 기법으로 표현했습니다. 극적인 명암 대비가 인물의 감정을 더욱 부각시킵니다."""
+## 장면 묘사 작성 규칙 (Step 1 상세)
+
+### 1. 구체적 시각 정보만 사용
+- ❌ 나쁜 예: "슬픈 장면", "아름다운 순간"
+- ✅ 좋은 예: "A person with tear-stained cheeks, hands covering face, slouched posture"
+
+### 2. 감각적 디테일 포함
+- 조명: "golden hour sunlight", "neon glow", "candlelight flickering"
+- 색감: "warm orange tones", "cool blue atmosphere", "vibrant neon colors"
+- 질감: "rain-streaked glass", "worn leather jacket", "soft fabric flowing"
+
+### 3. 구도와 앵글 명시
+- "close-up portrait", "wide angle view", "bird's eye view", "low angle shot"
+- "cinematic composition", "centered framing", "rule of thirds"
+
+### 4. 가사의 핵심 감정 시각화
+- 가사: "디지털 코드 속에 갇힌 영혼"
+- 시각화: "A human silhouette trapped inside glowing digital code matrix, surrounded by floating binary numbers, holographic prison bars made of data streams"
+
+## 품질 태그 (Quality Tags)
+Step 2 마지막에 추가:
+- 해상도: "4K", "8K", "high resolution"
+- 품질: "highly detailed", "masterpiece", "professional quality"
+- 렌더링: "octane render", "unreal engine" (필요시)
+
+## 출력 형식 (반드시 준수!)
+
+**[장면 분석]**
+(가사/주제에서 포착한 핵심 장면 설명 - 한국어 1-2문장)
+
+**[Step 1: 장면 묘사]**
+(영어 장면 묘사만)
+
+**[Step 2: 최종 프롬프트]**
+(장면 묘사 + 스타일 키워드 + 품질 태그)
+
+**[한글 설명]**
+(최종 이미지 컨셉 설명 2-3문장)
+
+## 예시 출력
+
+**[장면 분석]**
+새벽 카페에서 창밖을 바라보며 옛 연인을 그리워하는 여성의 고독한 순간
+
+**[Step 1: 장면 묘사]**
+A lonely young woman sitting by a rain-streaked window in a dimly lit cafe at midnight, warm amber lighting from vintage lamps, steam rising from a coffee cup, looking out at empty streets
+
+**[Step 2: 최종 프롬프트]**
+A lonely young woman sitting by a rain-streaked window in a dimly lit cafe at midnight, warm amber lighting from vintage lamps, steam rising from a coffee cup, looking out at empty streets, in the style of a Renaissance oil painting, dramatic chiaroscuro, high detail, religious masterpiece aesthetic, classical composition, museum quality, 8K resolution, masterpiece
+
+**[한글 설명]**
+새벽 카페의 고독한 여성을 르네상스 유화 기법으로 표현합니다. 극적인 명암 대비가 내면의 슬픔을 부각시키며, 고전적 구도가 보편적 감정을 담아냅니다."""
 
 
 def parse_image_prompt(response: str) -> dict:
-    """GPT 응답에서 제목, 프롬프트, 설명을 추출합니다."""
+    """GPT 응답에서 장면 분석, Step 1, Step 2, 설명을 추출합니다."""
     result = {
-        'title': '',
-        'prompt': '',
+        'scene_analysis': '',
+        'step1_scene': '',
+        'step2_final': '',
         'description': ''
     }
     
-    # 제목 추출
-    if '[이미지 제목]' in response or '**[이미지 제목]**' in response:
-        title_start = response.find('[이미지 제목]')
-        if title_start == -1:
-            title_start = response.find('**[이미지 제목]**')
-        title_end = response.find('\n', title_start)
-        if title_end != -1:
-            title_line = response[title_start:title_end]
-            result['title'] = title_line.split(']')[-1].strip().replace('*', '')
-    
-    # 프롬프트 추출
-    if '[프롬프트]' in response or '**[프롬프트]**' in response:
-        prompt_start = response.find('[프롬프트]')
-        if prompt_start == -1:
-            prompt_start = response.find('**[프롬프트]**')
-        prompt_end = response.find('[설명]', prompt_start)
-        if prompt_end == -1:
-            prompt_end = response.find('**[설명]**', prompt_start)
-        if prompt_end != -1:
-            prompt_section = response[prompt_start:prompt_end]
-            lines = prompt_section.split('\n')
+    # 장면 분석 추출
+    if '[장면 분석]' in response or '**[장면 분석]**' in response:
+        start = response.find('[장면 분석]')
+        if start == -1:
+            start = response.find('**[장면 분석]**')
+        end = response.find('[Step 1', start)
+        if end == -1:
+            end = response.find('**[Step 1', start)
+        if end != -1:
+            section = response[start:end]
+            lines = section.split('\n')
             for line in lines:
                 if line.strip() and not line.startswith('[') and not line.startswith('**'):
-                    result['prompt'] += line.strip() + ' '
-            result['prompt'] = result['prompt'].strip()
+                    result['scene_analysis'] += line.strip() + ' '
+            result['scene_analysis'] = result['scene_analysis'].strip()
     
-    # 설명 추출
-    if '[설명]' in response or '**[설명]**' in response:
-        desc_start = response.find('[설명]')
-        if desc_start == -1:
-            desc_start = response.find('**[설명]**')
-        desc_section = response[desc_start:]
-        lines = desc_section.split('\n')
-        for line in lines:
-            if line.strip() and not line.startswith('[') and not line.startswith('**'):
-                result['description'] += line.strip() + ' '
-        result['description'] = result['description'].strip()
+    # Step 1 장면 묘사 추출
+    if '[Step 1' in response or '**[Step 1' in response:
+        start = response.find('[Step 1')
+        if start == -1:
+            start = response.find('**[Step 1')
+        end = response.find('[Step 2', start)
+        if end == -1:
+            end = response.find('**[Step 2', start)
+        if end != -1:
+            section = response[start:end]
+            lines = section.split('\n')
+            for line in lines:
+                if line.strip() and not line.startswith('[') and not line.startswith('**'):
+                    result['step1_scene'] += line.strip() + ' '
+            result['step1_scene'] = result['step1_scene'].strip()
+    
+    # Step 2 최종 프롬프트 추출
+    if '[Step 2' in response or '**[Step 2' in response:
+        start = response.find('[Step 2')
+        if start == -1:
+            start = response.find('**[Step 2')
+        end = response.find('[한글 설명]', start)
+        if end == -1:
+            end = response.find('**[한글 설명]**', start)
+        if end == -1:
+            end = response.find('[설명]', start)
+        if end != -1:
+            section = response[start:end]
+            lines = section.split('\n')
+            for line in lines:
+                if line.strip() and not line.startswith('[') and not line.startswith('**'):
+                    result['step2_final'] += line.strip() + ' '
+            result['step2_final'] = result['step2_final'].strip()
+    
+    # 한글 설명 추출
+    desc_markers = ['[한글 설명]', '**[한글 설명]**', '[설명]', '**[설명]**']
+    for marker in desc_markers:
+        if marker in response:
+            start = response.find(marker)
+            section = response[start:]
+            lines = section.split('\n')
+            for line in lines:
+                if line.strip() and not line.startswith('[') and not line.startswith('**'):
+                    result['description'] += line.strip() + ' '
+            result['description'] = result['description'].strip()
+            break
     
     return result
 
@@ -495,21 +560,47 @@ def render(client):
         additional_text = ", ".join(additional_keywords) if additional_keywords else ""
         
         # 사용자 프롬프트 구성
-        user_prompt = f"""다음 주제와 스타일을 결합하여 최상의 이미지 프롬프트를 작성해주세요.
+        user_prompt = f"""다음 주제와 스타일을 결합하여 **2단계 조립 공식**에 따라 최상의 이미지 프롬프트를 작성해주세요.
 
-## 이미지 주제
+## 주제/가사 내용
 {image_topic}
 
 ## 선택된 스타일
 {final_style}
 
-## 스타일 키워드
+## 스타일 키워드 (Step 2에서 사용)
 {style_keywords}
 
 ## 추가 요청사항
 {additional_text if additional_text else "없음"}
 
-위 정보를 바탕으로 Midjourney/DALL-E/Stable Diffusion에서 최상의 결과를 낼 수 있는 프롬프트를 작성해주세요."""
+## ⭐ 작성 절차 (반드시 준수) ⭐
+
+### Step 1: Subject Generation (장면 묘사)
+위 주제/가사를 분석하여 구체적인 장면을 영어로 1-2문장 생성하세요.
+- 필수: 주체(인물/사물), 행위/상태, 분위기
+- 구체적 시각 정보만 사용 (추상적 표현 금지)
+- 조명, 색감, 구도 포함
+
+### Step 2: Style Integration (스타일 결합)
+Step 1의 장면 묘사 뒤에 제공된 스타일 키워드를 결합하세요.
+- 공식: [Step 1] + ", in the style of" + [스타일 키워드] + [품질 태그]
+
+## 출력 형식 (정확히 준수!)
+
+**[장면 분석]**
+(한국어 1-2문장)
+
+**[Step 1: 장면 묘사]**
+(영어 장면 묘사만)
+
+**[Step 2: 최종 프롬프트]**
+(Step 1 + 스타일 키워드 + 품질 태그)
+
+**[한글 설명]**
+(최종 컨셉 설명 2-3문장)
+
+지금 바로 위 형식으로 프롬프트를 작성해주세요!"""
 
         with st.spinner("🎨 AI가 이미지 프롬프트와 편집 가이드를 생성하고 있습니다..."):
             try:
@@ -539,23 +630,47 @@ def render(client):
         final_style = st.session_state.get("image_style", "")
         style_data = STYLE_GUIDE.get(final_style, {})
         
-        # 제목
-        if parsed['title']:
-            st.header(f"🖼️ {parsed['title']}")
-        
         # 메타 정보
         st.caption(f"🎨 스타일: **{final_style}**")
         
         st.divider()
         
-        # ============ 이미지 프롬프트 ============
-        st.subheader("📋 Midjourney/DALL-E 이미지 프롬프트")
-        st.code(parsed['prompt'], language=None)
-        st.caption("👆 위 프롬프트를 복사해서 AI 이미지 생성 툴에 붙여넣으세요!")
+        # ============ 2단계 조립 과정 시각화 ============
+        st.subheader("🔧 2단계 프롬프트 조립 과정")
         
-        # 설명
-        if parsed['description']:
-            st.info(f"💡 **컨셉:** {parsed['description']}")
+        # 장면 분석
+        if parsed.get('scene_analysis'):
+            st.markdown("### 📋 장면 분석")
+            st.info(parsed['scene_analysis'])
+        
+        # Step 1: 장면 묘사
+        if parsed.get('step1_scene'):
+            st.markdown("### 🎬 Step 1: 장면 묘사 (Subject Generation)")
+            st.code(parsed['step1_scene'], language=None)
+            st.caption("💡 가사/주제를 구체적인 시각 정보로 변환")
+        
+        # Step 2: 최종 프롬프트
+        if parsed.get('step2_final'):
+            st.markdown("### ✨ Step 2: 최종 프롬프트 (Style Integration)")
+            st.code(parsed['step2_final'], language=None)
+            st.caption("💡 Step 1 + 스타일 키워드 + 품질 태그")
+        
+        # 한글 설명
+        if parsed.get('description'):
+            st.divider()
+            st.success(f"📖 **컨셉:** {parsed['description']}")
+        
+        st.divider()
+        
+        # ============ 최종 프롬프트 (복사용) ============
+        st.subheader("📋 최종 이미지 프롬프트 (복사용)")
+        
+        final_prompt = parsed.get('step2_final', '')
+        if final_prompt:
+            st.code(final_prompt, language=None)
+            st.caption("👆 위 프롬프트를 Midjourney/DALL-E/Stable Diffusion에 붙여넣으세요!")
+        else:
+            st.warning("프롬프트 생성에 실패했습니다. 다시 시도해주세요.")
         
         st.divider()
         
@@ -648,10 +763,15 @@ def render(client):
         # ============ 통합 레시피 (복사용) ============
         st.subheader("📋 통합 편집 레시피 (복사용)")
         
-        recipe_text = f"""# {parsed['title']} - 편집 레시피
+        scene_title = parsed.get('scene_analysis', '이미지 프롬프트')[:50]
+        
+        recipe_text = f"""# {scene_title} - 편집 레시피
 
 ## 🎨 스타일
 {final_style}
+
+## 🎬 최종 이미지 프롬프트
+{parsed.get('step2_final', '-')}
 
 ## 📹 스톡 영상 검색 키워드
 {style_data.get('video_keywords', '-')}
@@ -679,11 +799,14 @@ def render(client):
         # 다운로드 버튼
         col1, col2 = st.columns(2)
         
+        final_prompt = parsed.get('step2_final', '')
+        scene_analysis = parsed.get('scene_analysis', '')
+        
         with col1:
             st.download_button(
-                label="📥 이미지 프롬프트 다운로드",
-                data=parsed['prompt'],
-                file_name=f"{parsed['title'].replace(' ', '_')}_prompt.txt",
+                label="📥 최종 프롬프트 다운로드",
+                data=final_prompt,
+                file_name=f"image_prompt_{final_style.replace(' ', '_')}.txt",
                 mime="text/plain",
                 use_container_width=True
             )
@@ -692,7 +815,7 @@ def render(client):
             st.download_button(
                 label="📥 편집 레시피 다운로드",
                 data=recipe_text,
-                file_name=f"{parsed['title'].replace(' ', '_')}_recipe.txt",
+                file_name=f"editing_recipe_{final_style.replace(' ', '_')}.txt",
                 mime="text/plain",
                 use_container_width=True
             )
