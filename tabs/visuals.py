@@ -1,116 +1,194 @@
 """
 tabs/visuals.py - 이미지 생성 탭 (Tab 4)
-스타일 프리셋 시스템 + AI 자동 추천
+스타일 프리셋 + AI 자동 추천 + 영상 편집 레시피
 """
 
 import streamlit as st
 from utils import get_gpt_response
 
 
-# ============ 스타일 라이브러리 (15종) ============
+# ============ 통합 스타일 가이드 (10종+) ============
 
-STYLE_PRESETS = {
+STYLE_GUIDE = {
     "AI 자동 추천": {
-        "keywords": "",
-        "description": "가사의 장르와 분위기를 분석하여 AI가 최적의 스타일을 선택합니다",
+        "image_prompt": "",
+        "video_keywords": "",
+        "effects": "",
+        "transitions": "",
+        "description": "가사의 장르와 키워드를 분석하여 AI가 최적의 스타일을 선택합니다",
         "preview": "🤖"
     },
     
     "르네상스 유화 (Renaissance Oil)": {
-        "keywords": "In the style of a Renaissance oil painting, dramatic chiaroscuro, high detail, religious masterpiece aesthetic, classical composition, golden age painting techniques, museum quality",
+        "image_prompt": "In the style of a Renaissance oil painting, dramatic chiaroscuro, high detail, religious masterpiece aesthetic, classical composition, golden age painting techniques, museum quality",
+        "video_keywords": "Golden hour, candle light, slow motion, museum atmosphere, classical architecture, Renaissance painting, baroque interior, dramatic shadows",
+        "effects": "Film grain, warm glow, soft focus, vignette, sepia tone, vintage film overlay",
+        "transitions": "Cross dissolve, fade to black, slow zoom, cinematic wipe",
         "description": "고전적이고 웅장한 분위기, 극적인 명암 대비",
-        "preview": "🖼️"
+        "preview": "🖼️",
+        "editing_tips": [
+            "🎬 **템포**: 느리고 웅장하게 (60-80 BPM에 맞춤)",
+            "✂️ **컷 타이밍**: 4박자마다 장면 전환 (바로크 음악의 리듬)",
+            "🎨 **색보정**: 따뜻한 톤 (Orange 30%, Teal -20%)",
+            "💡 **조명**: Golden hour 영상 위주, 촛불 클로즈업"
+        ]
     },
     
     "80년대 디스코 팝아트 (80s Disco Pop-Art)": {
-        "keywords": "Vibrant 80s disco pop art style, neon colors, halftone patterns, funky and energetic, retro groovy aesthetic, bold geometric shapes, Andy Warhol inspired",
+        "image_prompt": "Vibrant 80s disco pop art style, neon colors, halftone patterns, funky and energetic, retro groovy aesthetic, bold geometric shapes, Andy Warhol inspired",
+        "video_keywords": "Dancing lights, disco ball, city neon, retro party, 80s fashion, roller skating, arcade games, VHS aesthetic, dance floor",
+        "effects": "Glitch effect, RGB split, strobe lights, chromatic aberration, VHS distortion, neon glow, halftone dots",
+        "transitions": "Glitch transition, whip pan, beat-synced cuts, kaleidoscope effect",
         "description": "화려한 네온 컬러, 에너지 넘치는 레트로 감성",
-        "preview": "🕺"
+        "preview": "🕺",
+        "editing_tips": [
+            "🎬 **템포**: 빠르고 경쾌하게 (110-130 BPM)",
+            "✂️ **컷 타이밍**: 비트마다 빠른 컷 (0.5초 간격)",
+            "🎨 **색보정**: 네온 강조 (Saturation +40%, Contrast +20%)",
+            "💡 **필수 요소**: 디스코 볼 반짝임, RGB 글리치"
+        ]
     },
     
     "한국 민화 모던 (Modern Korean Minhwa)": {
-        "keywords": "Modernized Korean Minhwa style, traditional ink and wash brushwork, witty and colorful traditional depiction, Korean folk art aesthetic, symbolic animals and flowers, vibrant but harmonious colors",
+        "image_prompt": "Modernized Korean Minhwa style, traditional ink and wash brushwork, witty and colorful traditional depiction, Korean folk art aesthetic, symbolic animals and flowers, vibrant but harmonious colors",
+        "video_keywords": "Traditional Korean village, paper texture, nature scenes, joyful feast, hanbok, traditional market, Korean nature, folk dance, paper art animation",
+        "effects": "Ink splash transition, paper overlay, watercolor bleeding, traditional pattern overlay, brush stroke animation",
+        "transitions": "Ink wash wipe, paper tear transition, folding screen effect",
         "description": "전통과 현대가 조화된 한국적 감성",
-        "preview": "🎨"
+        "preview": "🎨",
+        "editing_tips": [
+            "🎬 **템포**: 경쾌하고 리드미컬 (90-110 BPM)",
+            "✂️ **컷 타이밍**: 전통 장단에 맞춰 (3박, 4박 혼합)",
+            "🎨 **색보정**: 오방색 강조 (빨강, 파랑, 노랑, 검정, 흰색)",
+            "💡 **특수효과**: 종이 질감 오버레이, 먹물 번짐"
+        ]
     },
     
     "지브리 애니메이션 (Studio Ghibli)": {
-        "keywords": "Studio Ghibli animation style, hand-drawn cel animation, lush landscapes, soft watercolor textures, nostalgic atmosphere, Hayao Miyazaki aesthetic, dreamy and whimsical",
+        "image_prompt": "Studio Ghibli animation style, hand-drawn cel animation, lush landscapes, soft watercolor textures, nostalgic atmosphere, Hayao Miyazaki aesthetic, dreamy and whimsical",
+        "video_keywords": "Nature scenes, countryside, clouds moving, peaceful village, train journey, sky view, green fields, gentle breeze, sunset horizon",
+        "effects": "Watercolor wash, soft bloom, film grain (subtle), hand-drawn overlay, dreamy atmosphere",
+        "transitions": "Cloud transition, gentle fade, parallax scrolling, sky wipe",
         "description": "따뜻하고 섬세한 손그림 애니메이션",
-        "preview": "🌿"
+        "preview": "🌿",
+        "editing_tips": [
+            "🎬 **템포**: 잔잔하고 서정적 (70-90 BPM)",
+            "✂️ **컷 타이밍**: 여유있게 (2-4초 지속)",
+            "🎨 **색보정**: 파스텔톤 (Saturation -10%, 따뜻한 필터)",
+            "💡 **필수 요소**: 구름 타임랩스, 자연 풍경"
+        ]
     },
     
     "사이버펑크 2077 (Cyberpunk Noir)": {
-        "keywords": "Cyberpunk 2077 style, high-tech noir aesthetic, neon-soaked streets, cinematic lighting, futuristic and gritty digital art, dystopian cityscape, holographic effects",
+        "image_prompt": "Cyberpunk 2077 style, high-tech noir aesthetic, neon-soaked streets, cinematic lighting, futuristic and gritty digital art, dystopian cityscape, holographic effects",
+        "video_keywords": "Neon city night, rain on street, hologram display, futuristic interface, cyberpunk street, digital glitch, robot movement, flying cars",
+        "effects": "Neon glow, digital glitch, holographic overlay, chromatic aberration, rain effect, lens flare, data stream",
+        "transitions": "Digital glitch, matrix transition, hologram flicker, cybernetic wipe",
         "description": "네온과 어둠이 공존하는 미래 도시",
-        "preview": "🌃"
+        "preview": "🌃",
+        "editing_tips": [
+            "🎬 **템포**: 강렬하고 날카롭게 (100-140 BPM)",
+            "✂️ **컷 타이밍**: 비트에 정확히 맞춤, 갑작스런 컷",
+            "🎨 **색보정**: 사이언 + 마젠타 (Teal +30%, Magenta +20%)",
+            "💡 **필수 요소**: 네온 반사, 비 오는 밤거리"
+        ]
     },
     
     "언리얼 엔진 5 렌더 (UE5 Photorealistic)": {
-        "keywords": "Unreal Engine 5 render, hyper-realistic 3D visualization, volumetric lighting, photorealistic textures, ray-traced reflections, movie-like cinematic quality, AAA game graphics",
+        "image_prompt": "Unreal Engine 5 render, hyper-realistic 3D visualization, volumetric lighting, photorealistic textures, ray-traced reflections, movie-like cinematic quality, AAA game graphics",
+        "video_keywords": "Cinematic camera movement, dramatic lighting, slow motion action, epic landscape, photorealistic human, detailed textures, volumetric fog",
+        "effects": "Lens flare, depth of field, motion blur, volumetric lighting, god rays, chromatic aberration",
+        "transitions": "Camera pan, dramatic zoom, fade with light leak, cinematic wipe",
         "description": "초사실적인 3D 렌더링, 영화 같은 품질",
-        "preview": "💎"
+        "preview": "💎",
+        "editing_tips": [
+            "🎬 **템포**: 영화적으로 다이나믹 (80-120 BPM)",
+            "✂️ **컷 타이밍**: 액션 신에 맞춤, 슬로우 모션 활용",
+            "🎨 **색보정**: 시네마틱 LUT (영화 같은 색감)",
+            "💡 **필수 요소**: Lens flare, 부드러운 피사체 심도"
+        ]
     },
     
     "픽사 3D 애니메이션 (Pixar 3D)": {
-        "keywords": "Pixar Disney 3D animation style, expressive character design, vibrant colors, soft ambient lighting, family-friendly aesthetic, rounded shapes, heartwarming atmosphere",
+        "image_prompt": "Pixar Disney 3D animation style, expressive character design, vibrant colors, soft ambient lighting, family-friendly aesthetic, rounded shapes, heartwarming atmosphere",
+        "video_keywords": "Cartoon character, playful animation, bright colors, bouncing movement, happy expressions, colorful environment, fun activities",
+        "effects": "Cartoon motion blur, exaggerated movement, bounce effect, sparkle overlay, bright highlights",
+        "transitions": "Bounce transition, pop-in effect, playful wipe, cartoon zoom",
         "description": "귀엽고 생동감 넘치는 3D 애니메이션",
-        "preview": "🎬"
+        "preview": "🎬",
+        "editing_tips": [
+            "🎬 **템포**: 경쾌하고 활기차게 (100-130 BPM)",
+            "✂️ **컷 타이밍**: 탄력있게, 동작에 맞춰 컷",
+            "🎨 **색보정**: 채도 높게 (Saturation +30%, Vibrance +20%)",
+            "💡 **필수 요소**: 과장된 움직임, 표정 클로즈업"
+        ]
     },
     
     "반 고흐 인상파 (Van Gogh Impressionism)": {
-        "keywords": "In the style of Vincent van Gogh, post-impressionist brushwork, swirling brushstrokes, vibrant impasto texture, emotional color palette, Starry Night aesthetic",
+        "image_prompt": "In the style of Vincent van Gogh, post-impressionist brushwork, swirling brushstrokes, vibrant impasto texture, emotional color palette, Starry Night aesthetic",
+        "video_keywords": "Starry night sky, swirling clouds, countryside, sunflower field, wheat field, cafe scene, artist studio, moonlight",
+        "effects": "Oil painting effect, brushstroke overlay, impasto texture, color vibration, painterly filter",
+        "transitions": "Brush stroke wipe, paint splash transition, swirling transition",
         "description": "소용돌이치는 붓터치, 감성적 색채",
-        "preview": "🌌"
+        "preview": "🌌",
+        "editing_tips": [
+            "🎬 **템포**: 감정적이고 표현적 (60-90 BPM)",
+            "✂️ **컷 타이밍**: 감정선에 따라 자연스럽게",
+            "🎨 **색보정**: 강렬한 원색 (파랑, 노랑 강조)",
+            "💡 **필수 요소**: 붓터치 효과, 소용돌이 패턴"
+        ]
     },
     
     "미니멀 라인 아트 (Minimal Line Art)": {
-        "keywords": "Minimalist line art illustration, single continuous line drawing, simple elegant composition, negative space emphasis, modern clean aesthetic, vector art style",
+        "image_prompt": "Minimalist line art illustration, single continuous line drawing, simple elegant composition, negative space emphasis, modern clean aesthetic, vector art style",
+        "video_keywords": "Simple shapes, geometric patterns, clean lines, white background, minimalist design, abstract forms, elegant movement",
+        "effects": "Line drawing animation, minimalist transition, clean fade, geometric overlay",
+        "transitions": "Line wipe, geometric reveal, minimal fade, shape morphing",
         "description": "깔끔하고 세련된 라인 드로잉",
-        "preview": "✏️"
-    },
-    
-    "일본 우키요에 (Japanese Ukiyo-e)": {
-        "keywords": "Japanese Ukiyo-e woodblock print style, bold outlines, flat color blocks, traditional Edo period aesthetic, Hokusai and Hiroshige inspired, elegant composition",
-        "description": "전통 일본 목판화 스타일",
-        "preview": "🗾"
+        "preview": "✏️",
+        "editing_tips": [
+            "🎬 **템포**: 모던하고 세련되게 (90-120 BPM)",
+            "✂️ **컷 타이밍**: 정확하고 깔끔한 컷",
+            "🎨 **색보정**: 단색 또는 2-3색 제한",
+            "💡 **필수 요소**: 선 그리기 애니메이션, 여백 활용"
+        ]
     },
     
     "다크 판타지 (Dark Fantasy)": {
-        "keywords": "Dark fantasy illustration, gothic aesthetic, dramatic shadows, mysterious atmosphere, ethereal lighting, medieval dark ages inspiration, moody and atmospheric",
+        "image_prompt": "Dark fantasy illustration, gothic aesthetic, dramatic shadows, mysterious atmosphere, ethereal lighting, medieval dark ages inspiration, moody and atmospheric",
+        "video_keywords": "Dark castle, foggy forest, moonlight, ravens, gothic architecture, mysterious ritual, shadow movement, torch light",
+        "effects": "Dark vignette, fog overlay, light rays, shadow enhancement, desaturation, eerie glow",
+        "transitions": "Shadow wipe, fade to black, smoke transition, mysterious reveal",
         "description": "어둡고 신비로운 판타지 세계관",
-        "preview": "🌑"
+        "preview": "🌑",
+        "editing_tips": [
+            "🎬 **템포**: 느리고 불안하게 (60-80 BPM)",
+            "✂️ **컷 타이밍**: 긴장감 유지, 갑작스런 컷 활용",
+            "🎨 **색보정**: 저채도, 어두운 톤 (Shadows -30%)",
+            "💡 **필수 요소**: 안개 효과, 불빛 플리커"
+        ]
     },
     
     "레트로 게임 픽셀아트 (Retro Pixel Art)": {
-        "keywords": "16-bit pixel art style, retro video game aesthetic, limited color palette, crisp pixel-perfect rendering, nostalgic 90s gaming vibe, isometric or side-view",
+        "image_prompt": "16-bit pixel art style, retro video game aesthetic, limited color palette, crisp pixel-perfect rendering, nostalgic 90s gaming vibe, isometric or side-view",
+        "video_keywords": "Retro game screen, pixel animation, 8-bit graphics, arcade games, game console, retro TV, pixel art characters",
+        "effects": "Pixelate effect, CRT scanlines, screen glitch, retro color palette, bit crush",
+        "transitions": "Pixel dissolve, screen transition, game over effect, loading screen",
         "description": "향수를 자극하는 레트로 픽셀 그래픽",
-        "preview": "🎮"
-    },
-    
-    "아르누보 포스터 (Art Nouveau Poster)": {
-        "keywords": "Art Nouveau poster style, flowing organic lines, ornamental floral motifs, elegant typography integration, Alphonse Mucha inspired, vintage advertising aesthetic",
-        "description": "우아한 곡선과 장식적 요소",
-        "preview": "🎭"
-    },
-    
-    "수채화 드로잉 (Watercolor Sketch)": {
-        "keywords": "Delicate watercolor illustration, soft edges, transparent washes, hand-painted texture, loose brushwork, artistic and dreamy atmosphere, paper texture visible",
-        "description": "부드럽고 몽환적인 수채화",
-        "preview": "🖌️"
-    },
-    
-    "스팀펑크 빅토리안 (Steampunk Victorian)": {
-        "keywords": "Steampunk Victorian style, brass and copper machinery, intricate gears and clockwork, industrial revolution aesthetic, retro-futuristic inventions, sepia-toned atmosphere",
-        "description": "증기기관과 빅토리아 시대의 만남",
-        "preview": "⚙️"
+        "preview": "🎮",
+        "editing_tips": [
+            "🎬 **템포**: 리드미컬하고 중독적 (100-140 BPM)",
+            "✂️ **컷 타이밍**: 8비트 음악 리듬에 맞춤",
+            "🎨 **색보정**: 제한된 팔레트 (8-16색)",
+            "💡 **필수 요소**: CRT 스캔라인, 픽셀 애니메이션"
+        ]
     }
 }
 
 
-# ============ AI 자동 추천 매핑 규칙 ============
+# ============ AI 자동 추천 매핑 (확장) ============
 
-AUTO_STYLE_MAPPING = {
+STYLE_AUTO_SELECT = {
     # 장르 기반
     "발라드": "수채화 드로잉 (Watercolor Sketch)",
     "시티팝": "80년대 디스코 팝아트 (80s Disco Pop-Art)",
@@ -129,25 +207,50 @@ AUTO_STYLE_MAPPING = {
     "웃기지만 진지하게": "레트로 게임 픽셀아트 (Retro Pixel Art)",
 }
 
+# 키워드 기반 추천 (가사 분석용)
+KEYWORD_STYLE_MAP = {
+    "디지털": "사이버펑크 2077 (Cyberpunk Noir)",
+    "코드": "사이버펑크 2077 (Cyberpunk Noir)",
+    "네온": "사이버펑크 2077 (Cyberpunk Noir)",
+    "취한": "한국 민화 모던 (Modern Korean Minhwa)",
+    "포장마차": "한국 민화 모던 (Modern Korean Minhwa)",
+    "아멘": "르네상스 유화 (Renaissance Oil)",
+    "교회": "르네상스 유화 (Renaissance Oil)",
+    "하늘": "지브리 애니메이션 (Studio Ghibli)",
+    "구름": "지브리 애니메이션 (Studio Ghibli)",
+    "어둠": "다크 판타지 (Dark Fantasy)",
+    "밤": "다크 판타지 (Dark Fantasy)",
+    "춤": "80년대 디스코 팝아트 (80s Disco Pop-Art)",
+    "디스코": "80년대 디스코 팝아트 (80s Disco Pop-Art)",
+}
 
-def get_auto_recommended_style(genre: str, vibe: str) -> str:
+
+def analyze_lyrics_for_style(lyrics: str, genre: str, vibe: str) -> str:
     """
-    장르와 Vibe를 분석하여 최적의 스타일을 자동 추천합니다.
+    가사, 장르, Vibe를 분석하여 최적의 스타일을 추천합니다.
     
     Args:
-        genre: 가사 장르
-        vibe: 가사 Vibe
+        lyrics: 가사 텍스트
+        genre: 장르
+        vibe: 분위기
         
     Returns:
         추천 스타일 이름
     """
-    # Vibe 우선 (더 구체적이므로)
-    if vibe in AUTO_STYLE_MAPPING:
-        return AUTO_STYLE_MAPPING[vibe]
+    # 1순위: Vibe 기반
+    if vibe in STYLE_AUTO_SELECT:
+        return STYLE_AUTO_SELECT[vibe]
     
-    # 장르 기반
-    if genre in AUTO_STYLE_MAPPING:
-        return AUTO_STYLE_MAPPING[genre]
+    # 2순위: 가사 키워드 분석
+    if lyrics:
+        lyrics_lower = lyrics.lower()
+        for keyword, style in KEYWORD_STYLE_MAP.items():
+            if keyword in lyrics_lower:
+                return style
+    
+    # 3순위: 장르 기반
+    if genre in STYLE_AUTO_SELECT:
+        return STYLE_AUTO_SELECT[genre]
     
     # 기본값
     return "지브리 애니메이션 (Studio Ghibli)"
@@ -201,16 +304,7 @@ A lonely young woman sitting by a rain-streaked window in a dimly lit cafe at mi
 
 
 def parse_image_prompt(response: str) -> dict:
-    """
-    GPT 응답에서 제목, 프롬프트, 설명을 추출합니다.
-    
-    Returns:
-        dict: {
-            'title': str,
-            'prompt': str,
-            'description': str
-        }
-    """
+    """GPT 응답에서 제목, 프롬프트, 설명을 추출합니다."""
     result = {
         'title': '',
         'prompt': '',
@@ -261,19 +355,18 @@ def parse_image_prompt(response: str) -> dict:
 def render(client):
     """이미지 생성 탭을 렌더링합니다."""
     
-    st.header("🎨 Step 4: AI 이미지 생성")
+    st.header("🎨 Step 4: AI 이미지 생성 + 영상 편집 가이드")
     st.markdown("""
-    가사 주제를 바탕으로 **독특한 스타일의 이미지 프롬프트**를 생성합니다.
+    가사 주제를 바탕으로 **독특한 스타일의 이미지 프롬프트**와 **유튜브 편집 레시피**를 생성합니다.
     
-    > 🎯 *"15가지 아트 스타일 중 선택 또는 AI 자동 추천"*
+    > 🎯 *"AI 자동 추천 + 10가지 스타일 + 편집 가이드"*
     """)
     
     st.info("""
-    ✨ **이렇게 사용하세요:**
-    1. 주제 입력 (Tab 1에서 생성한 가사 주제 활용 가능)
-    2. 스타일 선택 (AI 자동 추천 또는 직접 선택)
-    3. 프롬프트 생성
-    4. Midjourney/DALL-E/Stable Diffusion에서 실행!
+    ✨ **이 탭에서 제공하는 것:**
+    1. 🎨 **이미지 생성 프롬프트** - Midjourney/DALL-E용
+    2. 🎬 **영상 편집 레시피** - 스톡 영상 키워드, 전환효과, 특수효과
+    3. 📋 **편집 가이드** - 템포, 컷 타이밍, 색보정 팁
     """)
     
     st.divider()
@@ -283,6 +376,7 @@ def render(client):
     
     # Tab 1에서 가사 주제 자동 불러오기
     default_topic = st.session_state.get("lyrics_topic", "")
+    default_lyrics = st.session_state.get("lyrics", "")
     
     image_topic = st.text_area(
         "어떤 이미지를 만들고 싶으신가요?",
@@ -298,31 +392,39 @@ def render(client):
     st.divider()
     
     # ============ 스타일 선택 ============
-    st.subheader("🎨 이미지 스타일")
+    st.subheader("🎨 비주얼 스타일")
     
-    # 현재 장르/Vibe 가져오기
+    # 현재 장르/Vibe/가사 가져오기
     current_genre = st.session_state.get("lyrics_genre", "")
     current_vibe = st.session_state.get("lyrics_vibe", "")
     
     # AI 자동 추천 스타일
     auto_recommended = None
-    if current_genre or current_vibe:
-        auto_recommended = get_auto_recommended_style(current_genre, current_vibe)
+    if current_genre or current_vibe or default_lyrics:
+        auto_recommended = analyze_lyrics_for_style(default_lyrics, current_genre, current_vibe)
         st.success(f"🤖 **AI 추천 스타일:** {auto_recommended}")
-        st.caption(f"현재 장르({current_genre})와 Vibe({current_vibe})를 분석한 결과입니다.")
+        
+        if current_genre:
+            st.caption(f"📊 분석: 장르({current_genre}), Vibe({current_vibe})")
+        
+        # 추천 이유 표시
+        if default_lyrics:
+            found_keywords = [kw for kw in KEYWORD_STYLE_MAP.keys() if kw in default_lyrics.lower()]
+            if found_keywords:
+                st.caption(f"🔍 가사 키워드 발견: {', '.join(found_keywords[:3])}")
     
     # 스타일 선택
-    style_options = list(STYLE_PRESETS.keys())
+    style_options = list(STYLE_GUIDE.keys())
     
     selected_style = st.selectbox(
         "이미지 스타일 선택",
         options=style_options,
-        help="'AI 자동 추천'을 선택하면 장르에 맞는 스타일이 자동으로 적용됩니다"
+        help="'AI 자동 추천'을 선택하면 가사 분석 결과에 맞는 스타일이 자동으로 적용됩니다"
     )
     
     # 선택된 스타일 정보 표시
     if selected_style != "AI 자동 추천":
-        style_info = STYLE_PRESETS[selected_style]
+        style_info = STYLE_GUIDE[selected_style]
         
         col1, col2 = st.columns([1, 4])
         with col1:
@@ -333,7 +435,7 @@ def render(client):
     
     # 스타일 미리보기 (전체)
     with st.expander("🎨 모든 스타일 미리보기"):
-        for style_name, style_data in STYLE_PRESETS.items():
+        for style_name, style_data in STYLE_GUIDE.items():
             if style_name == "AI 자동 추천":
                 continue
             st.markdown(f"{style_data['preview']} **{style_name}**")
@@ -361,7 +463,7 @@ def render(client):
     st.divider()
     
     # ============ 생성 버튼 ============
-    if st.button("🎨 이미지 프롬프트 생성", type="primary", use_container_width=True):
+    if st.button("🎨 이미지 프롬프트 + 편집 가이드 생성", type="primary", use_container_width=True):
         if not image_topic.strip():
             st.error("이미지 주제를 입력해주세요.")
             return
@@ -379,8 +481,9 @@ def render(client):
         else:
             final_style = selected_style
         
-        # 스타일 키워드 가져오기
-        style_keywords = STYLE_PRESETS[final_style]["keywords"]
+        # 스타일 데이터 가져오기
+        style_data = STYLE_GUIDE[final_style]
+        style_keywords = style_data["image_prompt"]
         
         # 고급 옵션 반영
         additional_keywords = []
@@ -408,7 +511,7 @@ def render(client):
 
 위 정보를 바탕으로 Midjourney/DALL-E/Stable Diffusion에서 최상의 결과를 낼 수 있는 프롬프트를 작성해주세요."""
 
-        with st.spinner("🎨 AI가 이미지 프롬프트를 생성하고 있습니다..."):
+        with st.spinner("🎨 AI가 이미지 프롬프트와 편집 가이드를 생성하고 있습니다..."):
             try:
                 response = get_gpt_response(client, SYSTEM_ROLE, user_prompt)
                 
@@ -421,7 +524,7 @@ def render(client):
                 st.session_state["image_topic"] = image_topic
                 st.session_state["image_raw"] = response
                 
-                st.success("🎉 이미지 프롬프트가 생성되었습니다!")
+                st.success("🎉 이미지 프롬프트와 편집 가이드가 생성되었습니다!")
                 st.rerun()
                 
             except Exception as e:
@@ -434,6 +537,7 @@ def render(client):
     if "image_prompt" in st.session_state and st.session_state["image_prompt"]:
         parsed = st.session_state["image_prompt"]
         final_style = st.session_state.get("image_style", "")
+        style_data = STYLE_GUIDE.get(final_style, {})
         
         # 제목
         if parsed['title']:
@@ -444,38 +548,172 @@ def render(client):
         
         st.divider()
         
-        # 프롬프트 (복사 쉽게)
-        st.subheader("📋 Midjourney/DALL-E 프롬프트")
+        # ============ 이미지 프롬프트 ============
+        st.subheader("📋 Midjourney/DALL-E 이미지 프롬프트")
         st.code(parsed['prompt'], language=None)
         st.caption("👆 위 프롬프트를 복사해서 AI 이미지 생성 툴에 붙여넣으세요!")
         
         # 설명
         if parsed['description']:
-            st.divider()
-            st.subheader("💡 이미지 컨셉 설명")
-            st.info(parsed['description'])
+            st.info(f"💡 **컨셉:** {parsed['description']}")
+        
+        st.divider()
+        
+        # ============ 영상 편집 레시피 ============
+        st.subheader("🎬 유튜브 영상 편집 가이드")
+        
+        if style_data:
+            # 탭으로 구성
+            tab1, tab2, tab3, tab4 = st.tabs([
+                "📹 스톡 영상 키워드",
+                "✨ 특수 효과",
+                "🔄 화면 전환",
+                "🎯 편집 팁"
+            ])
+            
+            with tab1:
+                st.markdown("### 📹 추천 스톡 영상 검색 키워드")
+                st.markdown("**무료 스톡 영상 사이트에서 검색하세요:**")
+                st.success("🔍 Pexels, Pixabay, Videvo, Mixkit")
+                
+                if style_data.get("video_keywords"):
+                    keywords_list = [kw.strip() for kw in style_data["video_keywords"].split(',')]
+                    
+                    st.markdown("**추천 키워드:**")
+                    for i, keyword in enumerate(keywords_list, 1):
+                        st.markdown(f"{i}. `{keyword}`")
+                    
+                    # 전체 복사
+                    st.divider()
+                    st.code(style_data["video_keywords"], language=None)
+                    st.caption("👆 위 키워드들을 복사해서 스톡 영상 사이트에서 검색하세요")
+            
+            with tab2:
+                st.markdown("### ✨ 추천 특수 효과 (Effects)")
+                
+                if style_data.get("effects"):
+                    effects_list = [fx.strip() for fx in style_data["effects"].split(',')]
+                    
+                    st.markdown("**프리미어/다빈치 리졸브에서 적용:**")
+                    for i, effect in enumerate(effects_list, 1):
+                        st.markdown(f"{i}. 🎨 **{effect}**")
+                    
+                    st.divider()
+                    st.info("""
+                    💡 **효과 적용 팁:**
+                    - 과하지 않게, 음악과 어울리게
+                    - 클라이맥스에서 효과 강화
+                    - 일관된 스타일 유지
+                    """)
+            
+            with tab3:
+                st.markdown("### 🔄 추천 화면 전환 (Transitions)")
+                
+                if style_data.get("transitions"):
+                    transitions_list = [tr.strip() for tr in style_data["transitions"].split(',')]
+                    
+                    st.markdown("**추천 전환 효과:**")
+                    for i, transition in enumerate(transitions_list, 1):
+                        st.markdown(f"{i}. ➡️ **{transition}**")
+                    
+                    st.divider()
+                    st.warning("""
+                    ⚠️ **전환 사용 주의:**
+                    - 비트에 맞춰 전환
+                    - 한 영상에 2-3가지만 사용
+                    - 남발하지 말 것
+                    """)
+            
+            with tab4:
+                st.markdown("### 🎯 편집 실전 팁")
+                
+                if style_data.get("editing_tips"):
+                    for tip in style_data["editing_tips"]:
+                        st.markdown(tip)
+                    
+                    st.divider()
+                    st.success("""
+                    ✅ **편집 체크리스트:**
+                    - [ ] 템포에 맞는 컷 편집
+                    - [ ] 색보정 일관성 유지
+                    - [ ] 클라이맥스 강조
+                    - [ ] 전환 효과 적절히 사용
+                    - [ ] 스타일 통일성 유지
+                    """)
+                else:
+                    st.info("이 스타일에 대한 편집 팁이 준비 중입니다.")
+        
+        st.divider()
+        
+        # ============ 통합 레시피 (복사용) ============
+        st.subheader("📋 통합 편집 레시피 (복사용)")
+        
+        recipe_text = f"""# {parsed['title']} - 편집 레시피
+
+## 🎨 스타일
+{final_style}
+
+## 📹 스톡 영상 검색 키워드
+{style_data.get('video_keywords', '-')}
+
+## ✨ 특수 효과
+{style_data.get('effects', '-')}
+
+## 🔄 화면 전환
+{style_data.get('transitions', '-')}
+
+## 🎯 편집 팁
+"""
+        
+        if style_data.get("editing_tips"):
+            for tip in style_data["editing_tips"]:
+                recipe_text += f"{tip}\n"
+        
+        st.text_area(
+            "전체 레시피",
+            value=recipe_text,
+            height=400,
+            label_visibility="collapsed"
+        )
         
         # 다운로드 버튼
-        st.divider()
-        st.download_button(
-            label="📥 프롬프트 다운로드",
-            data=parsed['prompt'],
-            file_name=f"{parsed['title'].replace(' ', '_')}_prompt.txt",
-            mime="text/plain",
-            use_container_width=True
-        )
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.download_button(
+                label="📥 이미지 프롬프트 다운로드",
+                data=parsed['prompt'],
+                file_name=f"{parsed['title'].replace(' ', '_')}_prompt.txt",
+                mime="text/plain",
+                use_container_width=True
+            )
+        
+        with col2:
+            st.download_button(
+                label="📥 편집 레시피 다운로드",
+                data=recipe_text,
+                file_name=f"{parsed['title'].replace(' ', '_')}_recipe.txt",
+                mime="text/plain",
+                use_container_width=True
+            )
         
         # 사용 안내
         st.divider()
         st.success("""
-        🎉 **프롬프트 생성 완료!**
+        🎉 **이미지 프롬프트 + 편집 가이드 완성!**
         
         **다음 단계:**
-        1. 위 프롬프트를 **복사**
-        2. **Midjourney Discord** 또는 **DALL-E**에서 실행
-        3. 생성된 이미지를 뮤직비디오에 활용!
+        1. 📸 **이미지 생성**: 프롬프트를 Midjourney/DALL-E에서 실행
+        2. 🎬 **스톡 영상 다운로드**: 추천 키워드로 무료 영상 검색
+        3. ✂️ **영상 편집**: 편집 레시피에 따라 프리미어/다빈치에서 편집
+        4. 🎵 **음악 합성**: Suno/Udio에서 생성한 음악 추가
+        5. 🚀 **유튜브 업로드**: 완성된 뮤직비디오 공유!
         
-        💡 **팁:** Midjourney에서는 `--ar 16:9` 파라미터를 추가하면 와이드 화면으로 생성됩니다!
+        💡 **무료 스톡 영상 사이트:**
+        - Pexels: https://www.pexels.com/videos/
+        - Pixabay: https://pixabay.com/videos/
+        - Videvo: https://www.videvo.net/
+        - Mixkit: https://mixkit.co/free-stock-video/
         """)
         
         # 원본 응답 (디버깅용)
@@ -491,12 +729,12 @@ def render(client):
            - Tab 1에서 가사를 만들었다면 자동으로 불러와집니다
         
         2. **스타일 선택**
-           - AI 자동 추천: 장르에 맞는 스타일 자동 선택
-           - 직접 선택: 15가지 독특한 스타일 중 선택
+           - AI 자동 추천: 가사 분석 후 최적 스타일 자동 선택
+           - 직접 선택: 10가지 독특한 스타일 중 선택
         
         3. **생성 버튼** 클릭
         
-        4. **프롬프트 복사** → 이미지 생성 툴에서 실행!
+        4. **이미지 프롬프트 + 영상 편집 레시피** 받기!
         
-        > 💡 르네상스 유화부터 사이버펑크까지, 다양한 스타일을 시도해보세요!
+        > 💡 이미지 생성부터 영상 편집까지, 모든 가이드를 한 번에!
         """)
