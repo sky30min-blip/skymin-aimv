@@ -1,6 +1,6 @@
 """
-tabs/character.py - 캐릭터 생성 탭 (Tab 2) - 가사 기반 자동 추천 + 수동 수정
-한글 UI 매핑 + 마스터 투샷 전략 + AI 자동 추천 + 이미지 미리보기
+tabs/character.py - 캐릭터 생성 탭 (Tab 2) - Tab 3 스타일 완전 동기화
+가사 기반 자동 추천 + 11종 프리미엄 스타일 + 이미지 미리보기 + 마스터 투샷 전략
 """
 
 import streamlit as st
@@ -8,21 +8,99 @@ from utils import get_gpt_response
 import re
 
 
-# ============ 한글-영어 매핑 딕셔너리 ============
+# ============ Tab 3와 동기화된 프리미엄 스타일 가이드 (11종) ============
 
-ART_STYLE_MAP = {
-    "선택해주세요": "",
-    "지브리 스타일 (따뜻하고 섬세한)": "Studio Ghibli style, warm colors, soft lighting, hand-painted aesthetic",
-    "일본 애니메이션 (선명하고 역동적)": "Japanese anime style, vibrant colors, dynamic, cel-shaded, expressive",
-    "픽사/디즈니 3D (귀엽고 생동감)": "Pixar Disney 3D animation style, expressive, detailed, vibrant",
-    "실사 영화 (사실적이고 시네마틱)": "Photorealistic, cinematic lighting, high detail, movie still",
-    "사이버펑크 (네온, 미래적)": "Cyberpunk illustration, neon lights, futuristic, high contrast, sci-fi",
-    "한국 웹툰 (깔끔하고 감성적)": "Korean webtoon style, clean lines, emotional, soft shading, manhwa",
-    "수채화 (부드럽고 몽환적)": "Watercolor illustration, soft edges, dreamy atmosphere, artistic",
-    "다크 판타지 (어둡고 신비로운)": "Dark fantasy style, dramatic lighting, mysterious, gothic",
-    "90년대 레트로 애니 (복고풍 감성)": "Retro 90s anime style, nostalgic, cel shading, vibrant colors",
-    "직접 입력": "custom"
+STYLE_GUIDE = {
+    "AI 자동 추천": {
+        "image_keywords": "",
+        "description": "가사의 장르와 분위기를 분석하여 AI가 최적의 스타일을 선택합니다",
+        "preview": "🤖",
+        "preview_image": ""
+    },
+    
+    "고퀄리티 일본 애니메이션 (Cinematic Japanese Anime)": {
+        "image_keywords": "Modern high-end Japanese anime style, cinematic production value, sharp character lines, highly detailed background, atmospheric lighting effects, masterpiece anime still, professional color grading",
+        "description": "Production I.G, WIT Studio 같은 고예산 애니메이션의 한 장면. 선명한 선과 완벽한 배경",
+        "preview": "🎬",
+        "preview_image": "https://cdn.midjourney.com/20533ac1-924a-4e01-966c-785eb60957b8/0_1.png"
+    },
+    
+    "프리미엄 한국 웹툰 (Premium Korean Webtoon)": {
+        "image_keywords": "Premium Korean webtoon style, sharp digital linework, vibrant gradient lighting, manhwa aesthetic, detailed background, modern webtoon masterpiece",
+        "description": "나 혼자만 레벨업, 어느 날 공주가 되어버렸다 같은 세련된 최신 웹툰 스타일",
+        "preview": "📱",
+        "preview_image": "https://cdn.midjourney.com/ab3a0859-19ec-4eb9-8554-f04a9113db56/0_2.png"
+    },
+    
+    "클래식 흑백 만화 (Classic Korean Manhwa)": {
+        "image_keywords": "Classic Korean Manhwa style, detailed ink drawing, high contrast black and white with gray tones, traditional comic book hatching, 2D hand-drawn aesthetic",
+        "description": "정통 흑백 만화 스타일. 세밀한 펜터치와 강렬한 명암 대비",
+        "preview": "📖",
+        "preview_image": "https://cdn.midjourney.com/007e0390-fcba-4175-a7db-758aeae4438b/0_1.png"
+    },
+    
+    "교토 애니메이션 스타일 (Kyoto Animation)": {
+        "image_keywords": "Kyoto Animation style, delicate linework, soft lighting, emotional and serene, transparent colors, high-detail eyes, beautiful light reflections, premium slice-of-life anime aesthetic",
+        "description": "바이올렛 에버가든 같은 극강의 섬세함. 투명한 색채와 부드러운 감성",
+        "preview": "🌸",
+        "preview_image": "https://cdn.midjourney.com/76d004b6-a235-409f-b0dc-41d3c58c8f13/0_1.png"
+    },
+    
+    "수채화 판타지 (Ethereal Watercolor)": {
+        "image_keywords": "Dreamy watercolor illustration, soft pastels, fluid edges, emotional atmosphere, artistic brushstrokes, ethereal light, whimsical and poetic, high-end storybook aesthetic",
+        "description": "몽환적인 수채화 느낌. 경계가 번지는 서정적 분위기, 발라드에 최적",
+        "preview": "🎨",
+        "preview_image": "https://cdn.midjourney.com/89ff3672-f48b-4465-a214-935a8fd19633/0_1.png"
+    },
+    
+    "90년대 사이버펑크 (Classic Cyberpunk)": {
+        "image_keywords": "1990s Japanese Cyberpunk anime style, grit and neon, high-tech noir, hand-drawn aesthetic, dramatic shadows, futuristic dystopian cityscape, cinematic lighting, detailed mechanical design",
+        "description": "아키라, 공각기동대 같은 묵직하고 거친 느낌의 미래 도시",
+        "preview": "🌃",
+        "preview_image": "https://cdn.midjourney.com/4fb8a033-3db8-4e8a-8d08-f316471d69b8/0_3.png"
+    },
+    
+    "럭셔리 시티팝 (80s City Pop)": {
+        "image_keywords": "Retro Japanese City Pop aesthetic, art style by Hiroshi Nagai, flat saturated colors, sharp shadows, 1980s luxury anime style, vaporwave sunset, clean minimalist lines",
+        "description": "80년대 일본 시티팝 앨범 자켓. 강렬한 원색과 미니멀한 선의 세련미",
+        "preview": "🌆",
+        "preview_image": "https://cdn.midjourney.com/f9a94aba-fc63-4352-a787-c82ae17bbdee/0_0.png"
+    },
+    
+    "신카이 마코토 감성 (Makoto Shinkai)": {
+        "image_keywords": "Makoto Shinkai animation style, vibrant lighting, breathtaking sky and clouds, high-detail cityscapes, emotional atmosphere, hyper-detailed lens flare, luminous colors, cinematic background",
+        "description": "너의 이름은 처럼 빛의 산란과 구름, 압도적인 배경 퀄리티",
+        "preview": "☀️",
+        "preview_image": "https://cdn.midjourney.com/81db105a-9d37-401f-b056-3bf8e04f2daa/0_3.png"
+    },
+    
+    "지브리 2.0 (Miyazaki Masterpiece)": {
+        "image_keywords": "Studio Ghibli art style by Hayao Miyazaki, lush painterly background, hand-drawn aesthetic, high-quality cel animation, soft natural sunlight, nostalgic atmosphere, detailed watercolor texture",
+        "description": "거장 미야자키 하야오의 원화 느낌. 수채화 배경과 따뜻한 햇살",
+        "preview": "🌿",
+        "preview_image": "https://cdn.midjourney.com/b8354c0a-dee9-4c5e-9013-00f3e8726dfa/0_2.png"
+    },
+    
+    "90년대 한국 애니 (90s Korean Anime)": {
+        "image_keywords": "1990s Korean anime style, VHS aesthetic, chromatic aberration, bold outlines, neon purple and pink lighting, cinematic lofi vibe, retro cel-shaded",
+        "description": "90년대 한국 애니메이션 향수. VHS 질감과 전통 요소의 조화",
+        "preview": "📼",
+        "preview_image": "https://cdn.midjourney.com/d87c768f-65ab-4b5e-8f16-b3256a5627c9/0_1.png"
+    },
+    
+    "90년대 레트로 일본 애니 (90s Retro Anime)": {
+        "image_keywords": "Retro 90s anime style, nostalgic, cel shading, vibrant colors, City Pop aesthetic, Lo-fi vibe, purple and blue neon lighting, dreamy atmosphere, vintage aesthetic",
+        "description": "향수를 자극하는 90년대 일본 애니 감성. 시티팝과 로파이의 만남",
+        "preview": "🎵",
+        "preview_image": "https://cdn.midjourney.com/a83587b7-49e2-4830-b20b-1c7d2834d535/0_0.png"
+    }
 }
+
+# 스타일 옵션 리스트
+STYLE_OPTIONS = list(STYLE_GUIDE.keys())
+
+
+# ============ 추가 옵션 매핑 ============
 
 LIGHTING_MAP = {
     "자동 (AI 추천)": "natural lighting, well-lit",
@@ -42,8 +120,6 @@ BACKGROUND_MAP = {
     "추상적 패턴": "abstract pattern background, artistic"
 }
 
-# 한글 옵션 리스트 (UI 표시용)
-ART_STYLE_OPTIONS = list(ART_STYLE_MAP.keys())
 LIGHTING_OPTIONS = list(LIGHTING_MAP.keys())
 BACKGROUND_OPTIONS = list(BACKGROUND_MAP.keys())
 
@@ -83,7 +159,7 @@ SYSTEM_ROLE = """당신은 Midjourney 프롬프트 전문가이자 뮤직비디�
 - 반드시 --ar 16:9 --v 6.1로 끝낼 것"""
 
 
-# ============ 가사 분석 함수 (개선된 파싱) ============
+# ============ 가사 분석 함수 (정규표현식 파싱) ============
 
 def analyze_lyrics_for_character(client, lyrics: str) -> dict:
     """
@@ -138,16 +214,14 @@ Details: 소녀는 은발 단발에 LED 고글을 쓰고 있으며, 검은 가�
     try:
         response = get_gpt_response(client, analysis_system_role, analysis_prompt)
         
-        # ⭐ 개선된 파싱: 정규표현식 사용
+        # 정규표현식으로 안전하게 파싱
         subject = ""
         details = ""
         
-        # Subject 추출 (정규표현식)
         subject_match = re.search(r'Subject:\s*(.+?)(?=Details:|$)', response, re.DOTALL | re.IGNORECASE)
         if subject_match:
             subject = subject_match.group(1).strip()
         
-        # Details 추출 (정규표현식)
         details_match = re.search(r'Details:\s*(.+)', response, re.DOTALL | re.IGNORECASE)
         if details_match:
             details = details_match.group(1).strip()
@@ -158,7 +232,6 @@ Details: 소녀는 은발 단발에 LED 고글을 쓰고 있으며, 검은 가�
         }
         
     except Exception as e:
-        # 오류 발생 시 빈 값 반환
         print(f"가사 분석 오류: {str(e)}")
         return {"subject": "", "details": ""}
 
@@ -182,10 +255,9 @@ def render(client):
     
     st.divider()
     
-    # ============ ⭐ NEW: 가사 기반 자동 추천 버튼 ============
+    # ============ 가사 기반 자동 추천 ============
     st.subheader("🎭 캐릭터 정보 입력")
     
-    # 가사 존재 여부 확인
     has_lyrics = "lyrics" in st.session_state and st.session_state["lyrics"]
     
     if has_lyrics:
@@ -197,19 +269,14 @@ def render(client):
             else:
                 with st.spinner("🤖 가사를 분석하여 캐릭터를 추천하고 있습니다..."):
                     lyrics_content = st.session_state["lyrics"]
-                    
-                    # 가사 분석 함수 호출
                     analysis_result = analyze_lyrics_for_character(client, lyrics_content)
                     
                     if analysis_result["subject"] or analysis_result["details"]:
-                        # ⭐ 핵심: st.session_state에 직접 할당하여 입력창 값 설정
                         st.session_state["char_subject_input"] = analysis_result["subject"]
                         st.session_state["char_details_input"] = analysis_result["details"]
                         
                         st.success("✅ 가사 분석 완료! 아래 입력창이 자동으로 채워졌습니다.")
                         st.info("💡 마음에 들지 않으면 직접 수정하세요!")
-                        
-                        # 화면 갱신
                         st.rerun()
                     else:
                         st.warning("가사에서 캐릭터 정보를 추출하지 못했습니다. 직접 입력해주세요.")
@@ -220,14 +287,13 @@ def render(client):
         st.info("💡 Tab 1에서 가사를 먼저 생성하면, 여기서 캐릭터를 자동으로 추천받을 수 있습니다.")
         st.divider()
     
-    # ============ 캐릭터 정보 입력칸 (State 연결) ============
+    # ============ 캐릭터 정보 입력 ============
     
-    # 주인공 주제 입력 (key로 state와 연결)
     main_subject = st.text_input(
         "🌟 주인공 주제",
         placeholder="예: 사이버펑크 소녀와 그녀의 로봇 강아지",
         help="한 명이든 두 명이든, 뮤직비디오의 주인공을 모두 적어주세요",
-        key="char_subject_input"  # ⭐ 핵심: 고유 key 부여
+        key="char_subject_input"
     )
     
     with st.expander("💡 주제 예시 보기"):
@@ -237,13 +303,12 @@ def render(client):
         **2인 주인공 (투샷):** 사이버펑크 소녀와 로봇 강아지 / 어린 왕자와 여우
         """)
     
-    # 세부 특징 입력 (key로 state와 연결)
     details = st.text_area(
         "📝 세부 특징",
         placeholder="예: 소녀는 은발 단발에 LED 고글을 썼고, 검은 가죽 재킷을 입었다...",
         height=120,
         help="캐릭터의 외모, 의상, 포즈, 관계성 등을 구체적으로 적어주세요",
-        key="char_details_input"  # ⭐ 핵심: 고유 key 부여
+        key="char_details_input"
     )
     
     with st.expander("✍️ 세부 특징 작성 가이드"):
@@ -258,40 +323,73 @@ def render(client):
     
     st.divider()
     
-    # ============ 아트 스타일 (한글 매핑) ============
-    st.subheader("🖼️ 아트 스타일")
+    # ============ 프리미엄 스타일 선택 (이미지 미리보기) ============
+    st.subheader("🎨 비주얼 스타일")
     
-    art_style_kr = st.selectbox(
-        "화풍 선택",
-        options=ART_STYLE_OPTIONS,
-        help="원하는 아트 스타일을 선택하세요"
+    selected_style = st.selectbox(
+        "프리미엄 스타일 선택 (Tab 3와 동기화)",
+        options=STYLE_OPTIONS,
+        help="Tab 3 스토리보드와 동일한 11종 프리미엄 스타일"
     )
     
-    custom_style = ""
-    if art_style_kr == "직접 입력":
-        custom_style = st.text_input(
-            "✍️ 화풍 직접 입력 (영어 권장)",
-            placeholder="예: Moebius comic style, detailed linework",
-            help="Midjourney에서 사용할 영어 스타일을 입력하세요"
-        )
-    else:
-        # 선택된 스타일의 영어값 미리보기
-        if art_style_kr != "선택해주세요":
-            st.caption(f"🔤 **영어값:** `{ART_STYLE_MAP[art_style_kr][:40]}...`")
+    # 선택된 스타일 정보 + 이미지 미리보기
+    if selected_style != "AI 자동 추천":
+        style_info = STYLE_GUIDE[selected_style]
+        
+        col1, col2 = st.columns([2, 3])
+        
+        with col1:
+            # 이미지 미리보기
+            if style_info.get("preview_image"):
+                st.image(
+                    style_info["preview_image"], 
+                    caption=f"{style_info['preview']} {selected_style}",
+                    use_container_width=True
+                )
+            else:
+                st.markdown(f"### {style_info['preview']}")
+                st.markdown(f"**{selected_style}**")
+        
+        with col2:
+            st.markdown(f"### {selected_style}")
+            st.caption(style_info['description'])
+            
+            with st.expander("📋 스타일 키워드 보기"):
+                st.code(style_info['image_keywords'], language=None)
     
-    # ============ 추가 옵션 (한글 매핑) ============
-    with st.expander("⚙️ 추가 옵션"):
+    # 전체 스타일 갤러리
+    with st.expander("🎨 모든 스타일 미리보기 갤러리"):
+        cols = st.columns(3)
+        col_idx = 0
+        
+        for style_name, style_data in STYLE_GUIDE.items():
+            if style_name == "AI 자동 추천":
+                continue
+            
+            with cols[col_idx % 3]:
+                if style_data.get("preview_image"):
+                    st.image(style_data["preview_image"], use_container_width=True)
+                st.markdown(f"**{style_data['preview']} {style_name}**")
+                st.caption(style_data['description'])
+                st.divider()
+            
+            col_idx += 1
+    
+    st.divider()
+    
+    # ============ 추가 옵션 ============
+    with st.expander("⚙️ 추가 옵션 (조명 & 배경)"):
         lighting_kr = st.selectbox(
             "조명 분위기",
             options=LIGHTING_OPTIONS
         )
-        st.caption(f"🔤 `{LIGHTING_MAP[lighting_kr][:30]}...`")
+        st.caption(f"🔤 `{LIGHTING_MAP[lighting_kr]}`")
         
         background_kr = st.selectbox(
             "배경 스타일",
             options=BACKGROUND_OPTIONS
         )
-        st.caption(f"🔤 `{BACKGROUND_MAP[background_kr][:30]}...`")
+        st.caption(f"🔤 `{BACKGROUND_MAP[background_kr]}`")
     
     st.divider()
     
@@ -303,24 +401,16 @@ def render(client):
         if not details:
             st.error("세부 특징을 입력해주세요.")
             return
-        if art_style_kr == "선택해주세요":
-            st.error("화풍을 선택해주세요.")
-            return
-        if art_style_kr == "직접 입력" and not custom_style:
-            st.error("화풍을 직접 입력해주세요.")
+        if selected_style == "AI 자동 추천":
+            st.warning("구체적인 스타일을 선택해주세요. (AI 자동 추천은 Tab 3에서 사용됩니다)")
             return
         if client is None:
             st.error("API 키가 설정되지 않았습니다.")
             return
         
-        # ============ 영어값 변환 (핵심!) ============
-        if art_style_kr == "직접 입력":
-            art_style_en = custom_style
-            art_style_display = custom_style
-        else:
-            art_style_en = ART_STYLE_MAP[art_style_kr]
-            art_style_display = art_style_kr
-        
+        # 스타일 데이터 가져오기
+        style_data = STYLE_GUIDE[selected_style]
+        style_keywords = style_data["image_keywords"]
         lighting_en = LIGHTING_MAP[lighting_kr]
         background_en = BACKGROUND_MAP[background_kr]
         
@@ -331,7 +421,7 @@ def render(client):
 - 세부 특징: {details}
 
 ## 스타일 정보
-- 화풍: {art_style_en}
+- 화풍: {style_keywords}
 - 조명: {lighting_en}
 - 배경: {background_en}
 
@@ -347,10 +437,10 @@ def render(client):
             try:
                 result = get_gpt_response(client, SYSTEM_ROLE, user_prompt)
                 
-                # 세션 스테이트에 저장 (한글값과 영어값 모두!)
+                # ⭐ 중요: Tab 3 연동을 위한 데이터 저장
                 st.session_state["character_prompt"] = result
-                st.session_state["character_style"] = art_style_en  # 영어값 (스토리보드에서 사용)
-                st.session_state["character_style_kr"] = art_style_display  # 한글값 (UI 표시용)
+                st.session_state["character_style"] = style_keywords  # 영어 키워드
+                st.session_state["character_style_kr"] = selected_style  # ⭐ 한글 스타일명 (Tab 3 연동용)
                 st.session_state["character_subject"] = main_subject
                 
                 st.success("🎉 마스터 이미지 프롬프트가 생성되었습니다!")
@@ -366,7 +456,7 @@ def render(client):
         st.subheader("🖼️ 생성된 Midjourney 프롬프트")
         
         st.caption(f"🌟 주인공: {st.session_state.get('character_subject', '-')}")
-        st.caption(f"🎨 화풍: {st.session_state.get('character_style_kr', st.session_state.get('character_style', '-'))}")
+        st.caption(f"🎨 화풍: {st.session_state.get('character_style_kr', '-')}")
         
         st.markdown(st.session_state["character_prompt"])
         
@@ -394,7 +484,7 @@ def render(client):
         
         st.markdown("이 URL이 **Tab 3 (스토리보드)**에서 `--cref` 파라미터로 사용됩니다.")
         
-        # ⭐ NEW: --cw 안내 추가
+        # --cw 안내
         with st.expander("💡 --cw (Character Weight) 파라미터 안내"):
             st.markdown("""
             **--cw** 파라미터는 캐릭터 참조의 강도를 조절합니다:
@@ -421,13 +511,13 @@ def render(client):
                     st.session_state["master_image_url"] = master_url
                     st.success("✅ 마스터 이미지 URL이 저장되었습니다!")
                     st.info("👉 이제 **Tab 3 (스토리보드)**로 이동하세요!")
-                    st.rerun()  # 화면 갱신하여 이미지 미리보기 표시
+                    st.rerun()
                 else:
                     st.warning("유효한 URL인지 확인해주세요.")
             else:
                 st.error("URL을 입력해주세요.")
         
-        # ⭐ NEW: 이미지 미리보기 추가
+        # 이미지 미리보기
         if st.session_state.get("master_image_url"):
             st.divider()
             st.subheader("🖼️ 등록된 마스터 이미지")
@@ -442,7 +532,7 @@ def render(client):
             except Exception as e:
                 st.error(f"이미지를 불러올 수 없습니다. URL을 확인해주세요: {str(e)}")
             
-            # URL 초기화 버튼
+            # URL 초기화
             if st.button("🗑️ URL 초기화", use_container_width=True):
                 st.session_state["master_image_url"] = ""
                 st.rerun()
@@ -455,5 +545,7 @@ def render(client):
         1. **주인공 주제**에 캐릭터를 입력하세요
            - 💡 Tab 1에서 가사를 생성했다면 '가사로 캐릭터 자동 추천받기' 버튼 클릭!
         2. **세부 특징**에 외모, 의상, 포즈 등을 자세히 적어주세요
-        3. **화풍**을 선택하고 생성 버튼을 클릭하세요
+        3. **프리미엄 스타일**을 선택하고 생성 버튼을 클릭하세요
+        4. 생성된 프롬프트로 Midjourney에서 이미지를 만드세요
+        5. URL을 저장하고 **Tab 3 (스토리보드)**로 이동하세요!
         """)
