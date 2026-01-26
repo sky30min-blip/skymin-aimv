@@ -735,9 +735,25 @@ def render(client):
     # 스타일 선택
     style_options = list(STYLE_GUIDE.keys())
     
+    # ⭐ Tab 2에서 선택한 스타일을 기본값으로 설정
+    default_style = "AI 자동 추천"
+    if "character_style_kr" in st.session_state and st.session_state["character_style_kr"]:
+        # Tab 2에서 선택한 스타일이 있으면 그것을 기본값으로
+        char_style = st.session_state["character_style_kr"]
+        if char_style in style_options:
+            default_style = char_style
+            st.info(f"💡 Tab 2에서 선택하신 **{char_style}** 스타일이 자동 선택되었습니다!")
+    
+    # 기본값의 인덱스 찾기
+    try:
+        default_index = style_options.index(default_style)
+    except ValueError:
+        default_index = 0
+    
     selected_style = st.selectbox(
         "이미지 스타일 선택",
         options=style_options,
+        index=default_index,  # ⭐ Tab 2 연동
         help="각 스타일의 미리보기 이미지를 확인하세요"
     )
     
