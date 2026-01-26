@@ -129,6 +129,16 @@ STYLE_GUIDE = {
         "description": "향수를 자극하는 90년대 일본 애니 감성. 시티팝과 로파이의 만남",
         "preview": "🎵",
         "preview_image": "https://cdn.midjourney.com/a83587b7-49e2-4830-b20b-1c7d2834d535/0_0.png"
+    },
+    
+    "귀여운 치비 스타일 (Cute Chibi SD)": {
+        "image_keywords": "Cute Chibi style, SD Super Deformed character, 2-3 head tall proportions, big sparkling expressive eyes, tiny body, 2D vector art, clean lineart, vibrant pastel colors, kawaii aesthetic, trendy Korean illustration, high quality, detailed, round face, simplified features",
+        "video_keywords": "Cute character motion, bouncy animation, expressive facial changes, simple background, kawaii movements",
+        "effects": "Sparkle effects, floating heart icons, bright bloom, cartoonish motion lines, star twinkle, bubble pop",
+        "transitions": "Pop transition, bouncy slide, circle wipe, heart burst transition",
+        "description": "2~3등신의 극강의 귀여움. 웅장한 가사와 대비될 때 폭발적인 병맛 시너지를 냄",
+        "preview": "🧸",
+        "preview_image": "https://cdn.midjourney.com/8c4e9c72-14f0-4b15-8e5e-5c2f8e3b4d9a/0_1.png"
     }
 }
 
@@ -168,6 +178,10 @@ KEYWORD_STYLE_MAP = {
     "자연": "지브리 2.0 (Miyazaki Masterpiece)",
     "시티": "럭셔리 시티팝 (80s City Pop)",
     "레트로": "90년대 레트로 일본 애니 (90s Retro Anime)",
+    "귀여운": "귀여운 치비 스타일 (Cute Chibi SD)",
+    "치비": "귀여운 치비 스타일 (Cute Chibi SD)",
+    "카와이": "귀여운 치비 스타일 (Cute Chibi SD)",
+    "병맛": "귀여운 치비 스타일 (Cute Chibi SD)",
 }
 
 
