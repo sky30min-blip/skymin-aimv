@@ -1,6 +1,6 @@
 """
 tabs/character.py - 캐릭터 생성 탭 (Tab 2) - Tab 3 스타일 완전 동기화
-가사 기반 자동 추천 + 11종 프리미엄 스타일 + 이미지 미리보기 + 마스터 투샷 전략
+가사 기반 자동 추천 + 12종 프리미엄 스타일 + 이미지 미리보기 + 마스터 투샷 전략
 """
 
 import streamlit as st
@@ -8,7 +8,7 @@ from utils import get_gpt_response
 import re
 
 
-# ============ Tab 3와 동기화된 프리미엄 스타일 가이드 (11종) ============
+# ============ Tab 3와 동기화된 프리미엄 스타일 가이드 (12종) ============
 
 STYLE_GUIDE = {
     "AI 자동 추천": {
@@ -93,6 +93,13 @@ STYLE_GUIDE = {
         "description": "향수를 자극하는 90년대 일본 애니 감성. 시티팝과 로파이의 만남",
         "preview": "🎵",
         "preview_image": "https://cdn.midjourney.com/a83587b7-49e2-4830-b20b-1c7d2834d535/0_0.png"
+    },
+    
+    "귀여운 치비 스타일 (Cute Chibi SD)": {
+        "image_keywords": "Cute Chibi style, SD Super Deformed character, 2-3 head tall proportions, big sparkling expressive eyes, tiny body, 2D vector art, clean lineart, vibrant pastel colors, kawaii aesthetic, trendy Korean illustration, high quality, detailed, round face, simplified features",
+        "description": "2~3등신의 극강의 귀여움. 웅장한 가사와 대비될 때 폭발적인 병맛 시너지를 냄",
+        "preview": "🧸",
+        "preview_image": "https://cdn.midjourney.com/8c4e9c72-14f0-4b15-8e5e-5c2f8e3b4d9a/0_1.png"
     }
 }
 
@@ -329,7 +336,7 @@ def render(client):
     selected_style = st.selectbox(
         "프리미엄 스타일 선택 (Tab 3와 동기화)",
         options=STYLE_OPTIONS,
-        help="Tab 3 스토리보드와 동일한 11종 프리미엄 스타일"
+        help="Tab 3 스토리보드와 동일한 12종 프리미엄 스타일"
     )
     
     # 선택된 스타일 정보 + 이미지 미리보기
