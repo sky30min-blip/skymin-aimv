@@ -1,6 +1,6 @@
 """
 tabs/lyrics.py - Suno/Udio 최적화 가사 생성 탭 (Tab 1)
-제목 + 구조적 태그 + 보컬/연출 지시어 + 수정 기능 포함
+제목 + 구조적 태그 + 보컬/연출 지시어 + 수정 기능 포함 + 멀티 페르소나 모드 트리거
 """
 
 import streamlit as st
@@ -413,8 +413,108 @@ def render(client):
         # 보컬 타입별 지시문 가져오기
         vocal_instruction = get_vocal_instruction(vocal_type)
         
+        # ============ ⭐ Vibe 기반 모드 트리거 (핵심!) ⭐ ============
+        mode_trigger = ""
+        mode_examples = ""
+        
+        if selected_vibe_name in ["웃기지만 진지하게 (Satire)", "슬픈데 신나게 (Paradox)"]:
+            mode_trigger = """
+## ⚠️ 🌟 [모드 2: 공감과 반전의 엔터테이닝 모드] 강력 발동! ⚠️
+
+**당신의 임무: 시청자가 "와, 이거 내 얘기네!"라며 무릎을 탁 치게 만들기**
+
+### 핵심 원칙:
+1. **사소한 것을 장엄하게** - 치킨, 배달, 배터리, 재난문자 → 오페라/교회 성가대/디즈니 스타일로
+2. **스케일의 부조화** - 핸드폰 1% → 아포칼립스급 비극 / 배달 음식 → 종교적 경건함
+3. **극단적 대비** - 디즈니 멜로디 + 직장인 고통 가사
+4. **100% 진지하게** - 억지 유머 금지! 진지할수록 더 웃김!
+
+### 연출 지시어 필수:
+- [Intro - Grand Pipe Organ & Church Choir] 또는 [Intro - Disney-style Cheerful Piano]
+- [Chorus - Explosive Heavy Metal] 또는 [Chorus - Gregorian Chant]
+- 구체적 디테일: "부산 앞바다 파고", "1% 배터리 경고", "양념 반 후라이드 반"
+
+### 'Aha!' 예시 참고:
+- 핸드폰 배터리 → 세상의 종말
+- 월요일 출근 → 십자가를 지는 골고다 언덕
+- 배달 음식 → 천사의 나팔 소리, 구원자
+- 재난문자 → 그리스 비극
+
+**절대 규칙: 웃기려고 쓰지 말고, 비장하고 장엄하게 쓰세요!**
+"""
+            mode_examples = """
+
+## 🎬 엔터테이닝 모드 출력 예시 (반드시 참고!)
+
+**예시 1: 핸드폰 배터리의 비극**
+```
+[제목]
+1%의 아포칼립스
+
+[Intro - Grand Pipe Organ & Church Choir]
+(세상의 종말을 알리는 웅장함)
+하늘이 무너지고 땅이 갈라지는 비명
+온 세상이 어둠에 잠기는 순간
+(Thunder crash, dramatic strings)
+
+[Verse 1 - Operatic Male Vocal]
+(Dramatic, desperate)
+그것은... 내 핸드폰의 1% 배터리 경고
+충전기 없는 이 카페에서
+나는 무력한 영혼, 끊어진 연결
+세상과의 마지막 끈이 사라지네
+(String tremolo, building tension)
+```
+
+**예시 2: 월요일 아침의 아이러니**
+```
+[제목]
+월요일의 십자가
+
+[Intro - Acoustic Guitar - Bright and Happy]
+(Cheerful strumming, birds chirping)
+랄라라~ 라라라~
+
+[Verse 1 - Female Vocal, Sweet and Optimistic]
+(Disney princess style)
+새들이 노래하고 꽃들이 미소 짓는
+아름다운 월요일 아침~
+(Suddenly dark undertone)
+하지만 내 몸은 침대에 박힌 젖은 솜뭉치
+
+[Chorus - Contrast building]
+(Music stays cheerful, vocals desperate)
+알람 소리는 지옥의 나팔 소리
+출근길은 십자가를 지는 골고다 언덕
+(Ironic "La la la~" harmony)
+랄라라~ 또 월요일~
+```
+"""
+        
+        else:
+            mode_trigger = """
+## ⚠️ [모드 1: 진솔한 서사 모드] 사용 ⚠️
+
+**당신의 임무: 깊은 울림을 주는 진정성 있는 가사 작성**
+
+### 핵심 원칙:
+1. **일상의 세밀한 감정선** - 작은 순간들의 의미 포착
+2. **문학적이고 시적인 표현** - 은유와 상징 활용
+3. **억지 유머 없이** - 진솔하고 가슴 시린 고백
+4. **점층적 고조** - 감정이 자연스럽게 쌓여가도록
+
+### 연출 지시어:
+- [Intro - Soft piano intro, atmospheric]
+- [Chorus - Full band, emotional peak]
+- 계절과 자연의 비유 (벚꽃, 눈, 비)
+- 섬세한 감정 묘사
+
+**절대 규칙: 진부한 클리셰를 피하고, 참신하면서도 공감 가능한 표현을 사용하세요.**
+"""
+            mode_examples = ""
+        
         # ============ Generation Mode Prompt ============
-        user_prompt = f"""다음 조건에 맞는 **Suno/Udio 최적화 가사**를 작성해주세요.
+        user_prompt = f"""{mode_trigger}
 
 ## 기본 정보
 - **주제/스토리**: {topic}
@@ -452,6 +552,8 @@ def render(client):
 5. **Mureka & Suno 스타일 태그 생성**:
    - Mureka V7.6 Pro: 악기, 장르, 보컬, BPM, 분위기
    - Suno AI: 5단계 문장형 프롬프트 (Identity → Mood → Instruments → Performance → Production)
+
+{mode_examples}
 
 ## 출력 형식 (Suno/Udio 최적화)
 
