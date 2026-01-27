@@ -1,8 +1,11 @@
 """
-tabs/storyboard.py - 서사 중심 스토리보드 엔진 v3.0
+tabs/storyboard.py - 서사 중심 스토리보드 엔진 v3.1
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🎬 핵심 혁신: 가사의 텍스트가 아닌 '영혼'을 이미지로 번역
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+v3.1 업데이트 (NEW!):
+🔗 **가사-장면 매핑** - 각 장면의 근거가 되는 가사 원문 표시
 
 v3.0 주요 업그레이드:
 1. 📜 서사 중심 모드 - 가사 흐름에 따라 12~25개 최적 장면 수 자동 결정
@@ -199,6 +202,23 @@ A man sitting on a bench, looking sad, dark background
 
 ---
 
+## ⭐ 가사-장면 매핑 (v3.1 신규 기능)
+
+**중요**: 각 장면은 반드시 **가사 원문에서 근거**를 찾아 `source_lyrics` 필드에 명시해야 합니다.
+
+### 매핑 원칙:
+1. **직접 인용**: 해당 장면을 만들게 된 가사 구절을 정확히 인용
+2. **문맥 포함**: 앞뒤 1-2줄까지 포함하여 맥락 제공
+3. **길이 제한**: 1-3줄 이내 (너무 길면 핵심만)
+
+### 예시:
+```
+가사: "인류의 길을 밝힌 위대한 다섯 별이 있었으니\n공자, 석가, 예수, 소크라테스, 마호메트"
+→ source_lyrics: "인류의 길을 밝힌 위대한 다섯 별이 있었으니\n공자, 석가, 예수, 소크라테스, 마호메트"
+```
+
+---
+
 ## 출력 형식 (JSON)
 
 ```json
@@ -208,6 +228,7 @@ A man sitting on a bench, looking sad, dark background
   "scenes": [
     {
       "scene_number": 1,
+      "source_lyrics": "회식 자리 가기 싫어\n오늘따라 왜 이렇게 힘든지",
       "korean_context": "회사 회식 직전, 주인공의 피곤한 모습",
       "english_prompt": "{Visual Anchor} loosening his tie while staring at the flickering neon sign of a street bar, his reflection distorted in the rain-puddle at his feet, golden hour backlighting creating a halo effect around his silhouette",
       "technical_notes": "Golden hour, shallow depth of field, neon glow"
@@ -221,6 +242,7 @@ A man sitting on a bench, looking sad, dark background
 ## 최종 체크리스트
 
 프롬프트 생성 전 확인:
+- [ ] **source_lyrics**: 각 장면의 근거가 되는 가사 원문을 추출했는가?
 - [ ] 추상 개념을 물리적 요소로 100% 변환했는가?
 - [ ] 모든 장면에 -ing 동사가 포함되어 있는가?
 - [ ] 빛의 각도와 방향이 구체적으로 명시되어 있는가?
@@ -242,11 +264,13 @@ FIXED_SYSTEM_ROLE = """당신은 세계적인 뮤직비디오 감독입니다.
 
 각 장면마다:
 ```
-장면 N: [한글 맥락 설명]
+장면 N: [가사 원문]
+한글 맥락: [한글 설명]
 프롬프트: {Visual Anchor}, [구체적인 영어 프롬프트]
 ```
 
 ## 규칙
+- **가사 원문**: 각 장면의 근거가 되는 가사 구절을 정확히 인용 (1-3줄)
 - Visual Anchor를 모든 장면 프롬프트 맨 앞에 배치
 - 구체적이고 시각적인 묘사
 - 영화적 연출 요소 포함 (조명, 구도, 움직임)
@@ -334,22 +358,27 @@ def parse_fixed_mode_response(response: str, num_scenes: int) -> list:
         if not block.strip():
             continue
         
+        source_lyrics = ""
         korean_context = ""
         english_prompt = ""
         
-        # 한글 맥락과 영어 프롬프트 분리
+        # source_lyrics, 한글 맥락, 영어 프롬프트 분리
         lines = block.strip().split('\n')
         for line in lines:
             line = line.strip()
             if line.startswith('프롬프트:'):
                 english_prompt = line.replace('프롬프트:', '').strip()
-            elif line and not english_prompt:
-                korean_context += line + " "
+            elif line.startswith('한글 맥락:'):
+                korean_context = line.replace('한글 맥락:', '').strip()
+            elif line and not source_lyrics and not korean_context and not english_prompt:
+                # 첫 번째 줄은 가사 원문으로 간주
+                source_lyrics = line
         
         if english_prompt:
             scenes.append({
                 "scene_number": idx,
-                "korean_context": korean_context.strip(),
+                "source_lyrics": source_lyrics if source_lyrics else "가사 매핑 없음",
+                "korean_context": korean_context.strip() if korean_context else "",
                 "english_prompt": english_prompt,
                 "technical_notes": ""
             })
@@ -395,7 +424,7 @@ def render(client):
     # 장면 수정 상태 초기화
     initialize_scene_overrides()
     
-    st.header("🎬 Step 3: 서사 중심 스토리보드 엔진 v3.0")
+    st.header("🎬 Step 3: 서사 중심 스토리보드 엔진 v3.1")
     st.markdown("""
     가사의 **텍스트가 아닌 '영혼'**을 시각화합니다.
     
@@ -403,6 +432,9 @@ def render(client):
     """)
     
     st.success("""
+    ✨ **v3.1 업데이트 (NEW!):**
+    🔗 **가사-장면 매핑** - 각 장면의 근거가 되는 가사 원문을 명확히 표시
+    
     ✨ **v3.0 혁신적 업그레이드:**
     1. 📜 **서사 중심 모드** - 가사 흐름에 따라 12~25개 최적 장면 수 자동 결정
     2. 🎭 **입체적 맥락 해석** - "위대한 다섯 별" → 성당의 스테인드글라스 빛
@@ -877,15 +909,22 @@ def render(client):
         
         for scene in scenes:
             scene_num = scene["scene_number"]
+            source_lyrics = scene.get("source_lyrics", "")
             korean_ctx = scene["korean_context"]
             english_prompt = scene["english_prompt"]
             tech_notes = scene.get("technical_notes", "")
             
             with st.expander(f"🎬 장면 {scene_num}: {korean_ctx[:50]}..."):
                 
+                # ⭐ 가사 원문 (v3.1 신규 - 맨 위에 표시)
+                if source_lyrics and source_lyrics != "가사 매핑 없음":
+                    st.markdown("**📖 기반 가사:**")
+                    st.info(source_lyrics)
+                    st.divider()
+                
                 # 한글 맥락
                 st.markdown("**📝 한글 맥락:**")
-                st.info(korean_ctx)
+                st.success(korean_ctx)
                 
                 # 영어 프롬프트
                 st.markdown("**🔤 영어 프롬프트:**")
