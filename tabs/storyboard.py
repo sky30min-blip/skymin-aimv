@@ -817,14 +817,22 @@ def render(client):
     col_input, col_suggest = st.columns([4, 1])
     
     with col_input:
+        # 세션 스테이트에 visual_anchor가 없으면 초기화
+        if "visual_anchor" not in st.session_state:
+            st.session_state["visual_anchor"] = ""
+        
         visual_anchor = st.text_area(
             "주인공 핵심 외형 (영어)",
-            value=default_anchor,
+            value=st.session_state["visual_anchor"],  # value를 세션에서 직접 가져오기
             height=100,
             placeholder="예: Young woman with silver hair, wearing elegant dress, emerald pendant\n\n또는 '🤖 AI 추천' 버튼을 눌러 가사 기반 자동 생성",
             help="이 텍스트가 모든 장면에서 맥락에 맞게 적용됩니다",
             key="visual_anchor_input"
         )
+        
+        # 사용자가 직접 입력한 경우 세션에 저장
+        if visual_anchor != st.session_state.get("visual_anchor", ""):
+            st.session_state["visual_anchor"] = visual_anchor
     
     with col_suggest:
         st.markdown("#### 🤖")
@@ -845,15 +853,19 @@ def render(client):
                         suggested = suggest_visual_anchor(client, available_lyrics, current_genre, current_vibe)
                         
                         if suggested and suggested.strip():
+                            # 세션 스테이트에 저장
                             st.session_state["visual_anchor"] = suggested.strip()
-                            st.success("✅ AI 추천 완료! 페이지를 새로고침하거나 다시 입력하세요.")
-                            st.info(f"추천된 캐릭터: {suggested[:100]}...")
-                            # 강제 rerun
+                            st.success(f"✅ AI 추천 완료!")
+                            st.info(f"**추천 결과:**\n\n{suggested.strip()}")
+                            st.warning("⚠️ 위 내용이 입력칸에 표시되려면 **페이지를 새로고침**하거나 **다른 탭을 클릭 후 다시 돌아오세요**!")
+                            # rerun으로 즉시 반영
                             st.rerun()
                         else:
                             st.error("❌ AI 추천 생성에 실패했습니다. 다시 시도해주세요.")
                     except Exception as e:
                         st.error(f"❌ 오류 발생: {str(e)}")
+                        import traceback
+                        st.code(traceback.format_exc())
                     else:
                         st.error("추천 생성에 실패했습니다. 직접 입력해주세요.")
     
