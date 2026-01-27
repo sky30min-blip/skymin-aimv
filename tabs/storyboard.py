@@ -774,6 +774,42 @@ def render(client):
     이것이 시각적 일관성의 핵심입니다!
     """)
     
+    # ⭐ Tab 2에서 만든 캐릭터 자동 불러오기 (개선 버전)
+    tab2_character_loaded = False
+    
+    # 방법 1: character_prompt에서 영어 부분 추출 시도
+    if "character_prompt" in st.session_state and st.session_state["character_prompt"]:
+        prompt_text = st.session_state["character_prompt"]
+        # /imagine prompt: 이후의 내용 추출
+        if "/imagine prompt:" in prompt_text:
+            import re
+            # /imagine prompt: 다음부터 --ar 전까지 추출
+            match = re.search(r'/imagine prompt:\s*(.+?)(?:\s*--|\n|$)', prompt_text)
+            if match:
+                extracted = match.group(1).strip()
+                # 스타일 키워드 제거 (in the style of~ 부분)
+                if "in the style of" in extracted.lower():
+                    extracted = extracted.split(",")[0].strip()
+                
+                if extracted and len(extracted) > 10:  # 최소 길이 확인
+                    if "visual_anchor" not in st.session_state or not st.session_state.get("visual_anchor"):
+                        st.session_state["visual_anchor"] = extracted
+                        tab2_character_loaded = True
+    
+    # 방법 2: character_subject 사용 (한글일 수 있음)
+    if not tab2_character_loaded and "character_subject" in st.session_state and st.session_state["character_subject"]:
+        subject = st.session_state["character_subject"]
+        if "visual_anchor" not in st.session_state or not st.session_state.get("visual_anchor"):
+            # 한글이면 경고 표시
+            if any('\uac00' <= char <= '\ud7a3' for char in subject):
+                st.warning(f"⚠️ Tab 2 캐릭터: '{subject}' (한글입니다. 영어로 번역하거나 AI 추천을 사용하세요)")
+            else:
+                st.session_state["visual_anchor"] = subject
+                tab2_character_loaded = True
+    
+    if tab2_character_loaded:
+        st.success("✅ Tab 2에서 생성한 캐릭터가 자동으로 불러와졌습니다!")
+    
     # ⭐ 하드코딩 제거 - 빈 문자열로 변경
     default_anchor = st.session_state.get("visual_anchor", "")
     
@@ -792,22 +828,32 @@ def render(client):
     
     with col_suggest:
         st.markdown("#### 🤖")
-        if st.button("AI 추천", use_container_width=True, help="가사를 분석하여 어울리는 주인공을 AI가 제안합니다"):
-            if not lyrics_input.strip():
-                st.error("먼저 가사를 입력해주세요.")
+        if st.button("AI 추천", use_container_width=True, help="가사를 분석하여 어울리는 주인공을 AI가 제안합니다", key="ai_suggest_anchor"):
+            # 가사 확인 - lyrics_input이 아니라 세션에서 가져오기
+            available_lyrics = lyrics_input.strip() if lyrics_input.strip() else st.session_state.get("lyrics", "")
+            
+            if not available_lyrics:
+                st.error("❌ 먼저 Tab 1-B에서 가사를 생성해주세요!")
             elif client is None:
-                st.error("API 키가 설정되지 않았습니다.")
+                st.error("❌ API 키가 설정되지 않았습니다.")
             else:
                 with st.spinner("🤖 가사를 분석하여 주인공을 추천하고 있습니다..."):
                     current_genre = st.session_state.get("lyrics_genre", "")
                     current_vibe = st.session_state.get("lyrics_vibe", "")
                     
-                    suggested = suggest_visual_anchor(client, lyrics_input, current_genre, current_vibe)
-                    
-                    if suggested:
-                        st.session_state["visual_anchor"] = suggested
-                        st.success("✅ AI 추천 완료! 아래 입력창에 반영되었습니다.")
-                        st.rerun()
+                    try:
+                        suggested = suggest_visual_anchor(client, available_lyrics, current_genre, current_vibe)
+                        
+                        if suggested and suggested.strip():
+                            st.session_state["visual_anchor"] = suggested.strip()
+                            st.success("✅ AI 추천 완료! 페이지를 새로고침하거나 다시 입력하세요.")
+                            st.info(f"추천된 캐릭터: {suggested[:100]}...")
+                            # 강제 rerun
+                            st.rerun()
+                        else:
+                            st.error("❌ AI 추천 생성에 실패했습니다. 다시 시도해주세요.")
+                    except Exception as e:
+                        st.error(f"❌ 오류 발생: {str(e)}")
                     else:
                         st.error("추천 생성에 실패했습니다. 직접 입력해주세요.")
     
