@@ -834,6 +834,9 @@ def render(client):
             key="visual_anchor_widget",
             on_change=update_visual_anchor
         )
+        
+        # 사용자가 직접 수정한 경우 세션 업데이트 (on_change 외 추가 보장)
+        st.session_state["visual_anchor"] = visual_anchor
     
     with col_suggest:
         st.markdown("#### 🤖")
@@ -893,8 +896,7 @@ def render(client):
                     else:
                         st.error("추천 생성에 실패했습니다. 직접 입력해주세요.")
     
-    st.session_state["visual_anchor"] = visual_anchor
-    
+    # visual_anchor 값 검증 (text_area에서 이미 세션에 저장됨)
     if not visual_anchor.strip():
         st.warning("""
         ⚠️ **Visual Anchor가 비어있습니다!**
