@@ -840,6 +840,12 @@ def render(client):
             # 가사 확인 - lyrics_input이 아니라 세션에서 가져오기
             available_lyrics = lyrics_input.strip() if lyrics_input.strip() else st.session_state.get("lyrics", "")
             
+            st.write("🔍 **디버그 정보:**")
+            st.write(f"- lyrics_input 길이: {len(lyrics_input)}")
+            st.write(f"- 세션 lyrics 길이: {len(st.session_state.get('lyrics', ''))}")
+            st.write(f"- available_lyrics 길이: {len(available_lyrics)}")
+            st.write(f"- client 존재: {client is not None}")
+            
             if not available_lyrics:
                 st.error("❌ 먼저 Tab 1-B에서 가사를 생성해주세요!")
             elif client is None:
@@ -849,19 +855,32 @@ def render(client):
                     current_genre = st.session_state.get("lyrics_genre", "")
                     current_vibe = st.session_state.get("lyrics_vibe", "")
                     
+                    st.write(f"- 장르: {current_genre}")
+                    st.write(f"- Vibe: {current_vibe}")
+                    
                     try:
+                        st.write("⏳ suggest_visual_anchor 함수 호출 중...")
                         suggested = suggest_visual_anchor(client, available_lyrics, current_genre, current_vibe)
+                        
+                        st.write(f"✅ 함수 반환값 타입: {type(suggested)}")
+                        st.write(f"✅ 함수 반환값 길이: {len(suggested) if suggested else 0}")
                         
                         if suggested and suggested.strip():
                             # 세션 스테이트에 저장
                             st.session_state["visual_anchor"] = suggested.strip()
-                            st.success(f"✅ AI 추천 완료!")
-                            st.info(f"**추천 결과:**\n\n{suggested.strip()}")
-                            st.warning("⚠️ 위 내용이 입력칸에 표시되려면 **페이지를 새로고침**하거나 **다른 탭을 클릭 후 다시 돌아오세요**!")
-                            # rerun으로 즉시 반영
+                            st.success(f"✅ AI 추천 완료! 세션에 저장됨")
+                            st.info(f"**추천 결과 (전체):**\n\n{suggested.strip()}")
+                            
+                            # 세션 확인
+                            st.write(f"🔍 세션에 저장된 값: {st.session_state['visual_anchor'][:50]}...")
+                            
+                            st.warning("🔄 3초 후 자동 새로고침...")
+                            import time
+                            time.sleep(3)
                             st.rerun()
                         else:
-                            st.error("❌ AI 추천 생성에 실패했습니다. 다시 시도해주세요.")
+                            st.error(f"❌ AI가 빈 결과를 반환했습니다!")
+                            st.write(f"반환값: '{suggested}'")
                     except Exception as e:
                         st.error(f"❌ 오류 발생: {str(e)}")
                         import traceback
