@@ -5,6 +5,8 @@ API 키는 .streamlit/secrets.toml에서 관리
 """
 
 import streamlit as st
+import sys
+import traceback
 
 # 페이지 설정 (반드시 첫 번째로 호출)
 st.set_page_config(
@@ -14,14 +16,33 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 모듈 임포트
-from utils import (
-    get_openai_client, 
-    export_project_to_json, 
-    import_project_from_json, 
-    get_project_info_from_json
-)
-from tabs import theme_expander, lyrics, character, storyboard
+# ============ Import 에러 핸들링 ============
+try:
+    from utils import (
+        get_openai_client, 
+        export_project_to_json, 
+        import_project_from_json, 
+        get_project_info_from_json
+    )
+    print("✅ utils import 성공")
+except Exception as e:
+    st.error(f"❌ utils import 실패: {str(e)}")
+    st.code(traceback.format_exc())
+    st.stop()
+
+try:
+    from tabs import theme_expander, lyrics, character, storyboard
+    print("✅ 모든 tabs import 성공")
+except Exception as e:
+    st.error(f"❌ tabs import 실패: {str(e)}")
+    st.code(traceback.format_exc())
+    st.info("""
+    **해결 방법:**
+    1. `tabs/__init__.py` 파일이 존재하는지 확인
+    2. 파일 내용이 비어있지 않은지 확인
+    3. 모든 탭 파일(`theme_expander.py`, `lyrics.py`, `character.py`, `storyboard.py`)이 존재하는지 확인
+    """)
+    st.stop()
 
 
 def init_session_state():
@@ -175,120 +196,149 @@ def render_sidebar(client):
 
 def main():
     """메인 함수"""
-    # 세션 스테이트 초기화
-    init_session_state()
+    try:
+        # 세션 스테이트 초기화
+        init_session_state()
+        
+        # OpenAI 클라이언트 생성 (secrets.toml에서 API 키 로드)
+        client = get_openai_client()
+        
+        # 사이드바 렌더링
+        render_sidebar(client)
+        
+        # 메인 헤더
+        st.title("🎬 AI 뮤직비디오 제작 올인원 툴")
+        
+        # 현재 곡 제목 표시
+        if st.session_state.get("song_title"):
+            st.markdown(f"### 🎵 *{st.session_state['song_title']}*")
+        
+        st.markdown("""
+        가사 생성부터 캐릭터 일관성이 적용된 Midjourney 프롬프트까지, 
+        뮤직비디오 제작에 필요한 모든 것을 한 곳에서!
+        """)
+        
+        st.divider()
+        
+        # 탭 생성 (4개)
+        tab1a, tab1b, tab2, tab3 = st.tabs([
+            "💡 Step 1-A: 주제 확장",
+            "🎵 Step 1-B: 가사 생성",
+            "🎨 Step 2: 캐릭터 생성",
+            "🎬 Step 3: 스토리보드"
+        ])
+        
+        # ============ 각 탭 렌더링 (에러 핸들링 추가) ============
+        
+        with tab1a:
+            try:
+                theme_expander.render(client)
+            except Exception as e:
+                st.error(f"❌ Tab 1-A 렌더링 오류: {str(e)}")
+                st.code(traceback.format_exc())
+        
+        with tab1b:
+            try:
+                lyrics.render(client)
+            except Exception as e:
+                st.error(f"❌ Tab 1-B 렌더링 오류: {str(e)}")
+                st.code(traceback.format_exc())
+        
+        with tab2:
+            try:
+                character.render(client)
+            except Exception as e:
+                st.error(f"❌ Tab 2 렌더링 오류: {str(e)}")
+                st.code(traceback.format_exc())
+        
+        with tab3:
+            try:
+                storyboard.render(client)
+            except Exception as e:
+                st.error(f"❌ Tab 3 렌더링 오류: {str(e)}")
+                st.code(traceback.format_exc())
+        
+        # ============ 하단 네비게이션 ============
+        st.divider()
+        st.markdown("### 🔄 탭 전환하기")
+        
+        col1, col2 = st.columns([3, 1])
+        
+        with col1:
+            st.info("""
+            **탭을 전환하려면:**
+            1. 오른쪽 버튼을 눌러 페이지 상단으로 이동
+            2. 원하는 탭을 클릭하세요
+            """)
+        
+        with col2:
+            # JavaScript로 상단 스크롤
+            scroll_to_top = st.button("⬆️ 상단으로 이동", use_container_width=True, type="primary")
+            
+            if scroll_to_top:
+                st.markdown(
+                    """
+                    <script>
+                    window.scrollTo({top: 0, behavior: 'smooth'});
+                    </script>
+                    """,
+                    unsafe_allow_html=True
+                )
+        
+        st.divider()
+        
+        # 단계별 안내
+        st.markdown("### 📋 각 단계 요약")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.markdown("""
+            **💡 Step 1-A**
+            
+            주제 확장 (선택)
+            - 짧은 주제 입력
+            - AI가 3가지 버전 생성
+            """)
+        
+        with col2:
+            st.markdown("""
+            **🎵 Step 1-B**
+            
+            가사 생성
+            - 장르, Vibe 선택
+            - Suno/Udio 최적화
+            - Mureka 태그
+            """)
+        
+        with col3:
+            st.markdown("""
+            **🎨 Step 2**
+            
+            캐릭터 생성
+            - 마스터 이미지 프롬프트
+            - URL 저장
+            """)
+        
+        with col4:
+            st.markdown("""
+            **🎬 Step 3**
+            
+            스토리보드
+            - 20개 장면 프롬프트
+            - AI 스타일 추천
+            - 편집 레시피
+            """)
     
-    # OpenAI 클라이언트 생성 (secrets.toml에서 API 키 로드)
-    client = get_openai_client()
-    
-    # 사이드바 렌더링
-    render_sidebar(client)
-    
-    # 메인 헤더
-    st.title("🎬 AI 뮤직비디오 제작 올인원 툴")
-    
-    # 현재 곡 제목 표시
-    if st.session_state.get("song_title"):
-        st.markdown(f"### 🎵 *{st.session_state['song_title']}*")
-    
-    st.markdown("""
-    가사 생성부터 캐릭터 일관성이 적용된 Midjourney 프롬프트까지, 
-    뮤직비디오 제작에 필요한 모든 것을 한 곳에서!
-    """)
-    
-    st.divider()
-    
-    # 탭 생성 (4개)
-    tab1a, tab1b, tab2, tab3 = st.tabs([
-        "💡 Step 1-A: 주제 확장",
-        "🎵 Step 1-B: 가사 생성",
-        "🎨 Step 2: 캐릭터 생성",
-        "🎬 Step 3: 스토리보드"
-    ])
-    
-    # 각 탭 렌더링
-    with tab1a:
-        theme_expander.render(client)
-    
-    with tab1b:
-        lyrics.render(client)
-    
-    with tab2:
-        character.render(client)
-    
-    with tab3:
-        storyboard.render(client)
-    
-    # ============ 하단 네비게이션 ============
-    st.divider()
-    st.markdown("### 🔄 탭 전환하기")
-    
-    col1, col2 = st.columns([3, 1])
-    
-    with col1:
+    except Exception as e:
+        st.error("🚨 **치명적 오류 발생!**")
+        st.error(f"오류 내용: {str(e)}")
+        st.code(traceback.format_exc())
         st.info("""
-        **탭을 전환하려면:**
-        1. 오른쪽 버튼을 눌러 페이지 상단으로 이동
-        2. 원하는 탭을 클릭하세요
-        """)
-    
-    with col2:
-        # JavaScript로 상단 스크롤
-        scroll_to_top = st.button("⬆️ 상단으로 이동", use_container_width=True, type="primary")
-        
-        if scroll_to_top:
-            st.markdown(
-                """
-                <script>
-                window.scrollTo({top: 0, behavior: 'smooth'});
-                </script>
-                """,
-                unsafe_allow_html=True
-            )
-    
-    st.divider()
-    
-    # 단계별 안내
-    st.markdown("### 📋 각 단계 요약")
-    
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.markdown("""
-        **💡 Step 1-A**
-        
-        주제 확장 (선택)
-        - 짧은 주제 입력
-        - AI가 3가지 버전 생성
-        """)
-    
-    with col2:
-        st.markdown("""
-        **🎵 Step 1-B**
-        
-        가사 생성
-        - 장르, Vibe 선택
-        - Suno/Udio 최적화
-        - Mureka 태그
-        """)
-    
-    with col3:
-        st.markdown("""
-        **🎨 Step 2**
-        
-        캐릭터 생성
-        - 마스터 이미지 프롬프트
-        - URL 저장
-        """)
-    
-    with col4:
-        st.markdown("""
-        **🎬 Step 3**
-        
-        스토리보드
-        - 20개 장면 프롬프트
-        - AI 스타일 추천
-        - 편집 레시피
+        **문제 해결 방법:**
+        1. Streamlit 앱을 완전히 재시작하세요
+        2. `tabs/__init__.py` 파일에 올바른 내용이 있는지 확인하세요
+        3. 모든 탭 파일이 `tabs/` 폴더에 있는지 확인하세요
         """)
 
 
