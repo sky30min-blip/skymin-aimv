@@ -731,37 +731,69 @@ def render(client):
     # ============ 일관성 장치 (Character & Style URLs) ============
     st.subheader("🔗 일관성 장치 (Character & Style URLs)")
     
+    # 🔍 디버깅: 세션에 있는 URL 관련 키 모두 출력
+    with st.expander("🔍 디버깅: 세션 스테이트 확인"):
+        url_keys = [k for k in st.session_state.keys() if 'url' in k.lower() or 'image' in k.lower() or 'character' in k.lower()]
+        if url_keys:
+            st.write("**세션에 저장된 URL/이미지 관련 키:**")
+            for key in url_keys:
+                value = st.session_state.get(key, "")
+                if isinstance(value, str) and len(value) < 200:
+                    st.write(f"- `{key}`: {value[:100]}")
+        else:
+            st.warning("URL 관련 세션 키가 없습니다!")
+    
     col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("#### 🧑 캐릭터 참조 URL")
-        default_char_url = st.session_state.get("master_image_url", "")
+        
+        # 세션에 캐릭터 URL이 없으면 초기화
+        if "master_image_url" not in st.session_state:
+            st.session_state["master_image_url"] = ""
+        
+        # 현재 세션 값 가져오기
+        current_char_url = st.session_state.get("master_image_url", "")
         
         char_url = st.text_input(
             "캐릭터 이미지 URL (--cref)",
-            value=default_char_url,
+            value=current_char_url,
             placeholder="https://cdn.midjourney.com/...",
-            help="Tab 2에서 생성한 캐릭터 이미지 URL",
-            key="char_url_input"
+            help="Tab 2에서 생성한 캐릭터 이미지 URL"
         )
         
-        if default_char_url:
-            st.caption("💡 Tab 2에서 저장한 URL이 불러와졌습니다.")
+        # 사용자가 입력한 값이 세션과 다르면 업데이트
+        if char_url != current_char_url:
+            st.session_state["master_image_url"] = char_url
+        
+        if current_char_url:
+            st.success("✅ Tab 2에서 저장한 URL이 불러와졌습니다!")
+            st.caption(f"URL: {current_char_url[:50]}...")
     
     with col2:
         st.markdown("#### 🎨 스타일 참조 URL")
-        default_style_url = st.session_state.get("style_reference_url", "")
+        
+        # 세션에 스타일 URL이 없으면 초기화
+        if "style_reference_url" not in st.session_state:
+            st.session_state["style_reference_url"] = ""
+        
+        # 현재 세션 값 가져오기
+        current_style_url = st.session_state.get("style_reference_url", "")
         
         style_url = st.text_input(
             "스타일(화풍) 이미지 URL (--sref)",
-            value=default_style_url,
+            value=current_style_url,
             placeholder="https://cdn.midjourney.com/...",
-            help="모든 장면의 색감/질감을 고정할 참조 이미지 URL",
-            key="style_url_input"
+            help="모든 장면의 색감/질감을 고정할 참조 이미지 URL"
         )
         
-        if style_url:
-            st.caption("✅ 스타일 URL이 입력되었습니다. (--sw 1000 자동 적용)")
+        # 사용자가 입력한 값이 세션과 다르면 업데이트
+        if style_url != current_style_url:
+            st.session_state["style_reference_url"] = style_url
+        
+        if current_style_url:
+            st.success("✅ 스타일 URL이 입력되었습니다.")
+            st.caption("(--sw 1000 자동 적용)")
         else:
             st.info("💡 스타일 URL을 입력하면 모든 장면의 화풍이 완벽히 통일됩니다.")
     
@@ -821,22 +853,21 @@ def render(client):
         if "visual_anchor" not in st.session_state:
             st.session_state["visual_anchor"] = ""
         
-        # on_change 콜백 함수
-        def update_visual_anchor():
-            st.session_state["visual_anchor"] = st.session_state["visual_anchor_widget"]
+        # 현재 세션 값 가져오기
+        current_value = st.session_state.get("visual_anchor", "")
         
+        # text_area 렌더링 (key 없이!)
         visual_anchor = st.text_area(
             "주인공 핵심 외형 (영어)",
-            value=st.session_state["visual_anchor"],  # 세션에서 직접 가져오기
+            value=current_value,
             height=100,
             placeholder="예: Young woman with silver hair, wearing elegant dress, emerald pendant\n\n또는 '🤖 AI 추천' 버튼을 눌러 가사 기반 자동 생성",
-            help="이 텍스트가 모든 장면에서 맥락에 맞게 적용됩니다",
-            key="visual_anchor_widget",
-            on_change=update_visual_anchor
+            help="이 텍스트가 모든 장면에서 맥락에 맞게 적용됩니다"
         )
         
-        # 사용자가 직접 수정한 경우 세션 업데이트 (on_change 외 추가 보장)
-        st.session_state["visual_anchor"] = visual_anchor
+        # 사용자가 입력한 값이 세션과 다르면 업데이트
+        if visual_anchor != current_value:
+            st.session_state["visual_anchor"] = visual_anchor
     
     with col_suggest:
         st.markdown("#### 🤖")
@@ -873,16 +904,11 @@ def render(client):
                             # 세션 스테이트에 저장
                             st.session_state["visual_anchor"] = suggested.strip()
                             
-                            # 기존 위젯 key 삭제 (강제 리로드)
-                            if "visual_anchor_widget" in st.session_state:
-                                del st.session_state["visual_anchor_widget"]
-                            
                             st.success(f"✅ AI 추천 완료! 세션에 저장됨")
                             st.info(f"**추천 결과 (전체):**\n\n{suggested.strip()}")
                             
                             # 세션 확인
-                            st.write(f"🔍 세션에 저장된 값: {st.session_state['visual_anchor'][:50]}...")
-                            st.write(f"🔍 위젯 key 삭제됨: {'visual_anchor_widget' not in st.session_state}")
+                            st.write(f"🔍 세션에 저장된 값: {st.session_state['visual_anchor'][:100]}...")
                             
                             st.warning("🔄 즉시 새로고침...")
                             st.rerun()
