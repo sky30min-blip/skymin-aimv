@@ -821,18 +821,19 @@ def render(client):
         if "visual_anchor" not in st.session_state:
             st.session_state["visual_anchor"] = ""
         
+        # on_change 콜백 함수
+        def update_visual_anchor():
+            st.session_state["visual_anchor"] = st.session_state["visual_anchor_widget"]
+        
         visual_anchor = st.text_area(
             "주인공 핵심 외형 (영어)",
-            value=st.session_state["visual_anchor"],  # value를 세션에서 직접 가져오기
+            value=st.session_state["visual_anchor"],  # 세션에서 직접 가져오기
             height=100,
             placeholder="예: Young woman with silver hair, wearing elegant dress, emerald pendant\n\n또는 '🤖 AI 추천' 버튼을 눌러 가사 기반 자동 생성",
             help="이 텍스트가 모든 장면에서 맥락에 맞게 적용됩니다",
-            key="visual_anchor_input"
+            key="visual_anchor_widget",
+            on_change=update_visual_anchor
         )
-        
-        # 사용자가 직접 입력한 경우 세션에 저장
-        if visual_anchor != st.session_state.get("visual_anchor", ""):
-            st.session_state["visual_anchor"] = visual_anchor
     
     with col_suggest:
         st.markdown("#### 🤖")
@@ -868,15 +869,19 @@ def render(client):
                         if suggested and suggested.strip():
                             # 세션 스테이트에 저장
                             st.session_state["visual_anchor"] = suggested.strip()
+                            
+                            # 기존 위젯 key 삭제 (강제 리로드)
+                            if "visual_anchor_widget" in st.session_state:
+                                del st.session_state["visual_anchor_widget"]
+                            
                             st.success(f"✅ AI 추천 완료! 세션에 저장됨")
                             st.info(f"**추천 결과 (전체):**\n\n{suggested.strip()}")
                             
                             # 세션 확인
                             st.write(f"🔍 세션에 저장된 값: {st.session_state['visual_anchor'][:50]}...")
+                            st.write(f"🔍 위젯 key 삭제됨: {'visual_anchor_widget' not in st.session_state}")
                             
-                            st.warning("🔄 3초 후 자동 새로고침...")
-                            import time
-                            time.sleep(3)
+                            st.warning("🔄 즉시 새로고침...")
                             st.rerun()
                         else:
                             st.error(f"❌ AI가 빈 결과를 반환했습니다!")
