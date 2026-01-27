@@ -1,13 +1,22 @@
 """
 tabs/storyboard.py - 스토리보드 생성 탭 (완전판 All-in-One)
-모든 기능이 포함된 완전한 버전 (하드코딩 제거 + AI 추천 포함)
+원본 3개 파일의 모든 기능 포함
 """
 
 import streamlit as st
 from utils import get_gpt_response
-import json
 
 
+# ============================================================================
+# CONFIG 데이터 (storyboard_config.py 내용)
+# ============================================================================
+
+
+# ============ 스타일 가이드 (11종 + AI 자동 추천) ============
+
+STYLE_GUIDE = {
+    "AI 자동 추천": {
+        "image_keywords": "",
         "video_keywords": "",
         "effects": "",
         "transitions": "",
@@ -336,10 +345,17 @@ def analyze_lyrics_for_style(lyrics: str, genre: str, vibe: str) -> str:
     # 기본값
     return "지브리 2.0 (Miyazaki Masterpiece)"
 
+
 # ============================================================================
-# UTILS 함수들
+# UTILS 함수들 (storyboard_utils.py 내용)
 # ============================================================================
 
+
+import streamlit as st
+from utils import get_gpt_response
+
+
+# ============ 장면 파싱 함수들 ============
 
 def parse_scenes_20_ab(gpt_response: str) -> list:
     """20+A/B 방식 GPT 응답 파싱"""
@@ -630,8 +646,9 @@ def suggest_visual_anchor(client, lyrics: str, genre: str = "", vibe: str = "") 
     except Exception as e:
         return ""
 
+
 # ============================================================================
-# 메인 RENDER 함수
+# 메인 RENDER 함수 (tabs/storyboard.py 내용)
 # ============================================================================
 
 def render(client):
