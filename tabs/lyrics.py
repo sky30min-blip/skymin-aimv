@@ -1,6 +1,7 @@
 """
 tabs/lyrics.py - Suno/Udio 최적화 가사 생성 탭 (Tab 1)
 제목 + 구조적 태그 + 보컬/연출 지시어 + 수정 기능 포함 + 멀티 페르소나 모드 트리거
+Clean & Epic 철학 완전 통합 버전
 """
 
 import streamlit as st
@@ -22,46 +23,48 @@ def get_vocal_instruction(vocal_type: str) -> str:
     """
     instructions = {
         "솔로 (남성)": """
-## 보컬 구조 지시사항 (남성 솔로)
+## 보컬 구조 지시사항 (남성 솔로 - Clean & Epic)
 - 모든 파트에 [Verse], [Chorus], [Bridge] 태그 필수
 - 보컬 타입 명시: [Male Vocal], [Male Voice]
-- 감정 변화를 연출 지시어로 표현:
-  * 약한 감정: (Soft voice), (Whispering), (Gentle singing)
-  * 보통 감정: (Clear vocal), (Steady voice)
-  * 강한 감정: (Powerful belting), (Emotional cry), (High note)
-- Sound FX 활용: (Guitar riff), (Drum hit), (Bass drop), (Clock ticking)
+- 감정 변화를 연출 지시어로 표현 (명료성 우선):
+  * 약한 감정: (Soft voice), (Gentle singing), (Intimate delivery)
+  * 보통 감정: (Clear vocal), (Steady voice), (Articulate tone)
+  * 강한 감정: (Powerful belting), (Emotional cry), (Soaring high note)
+- ⚠️ 금지: (Gritty), (Shouting), (Aggressive), (Screaming)
+- Sound FX 활용: (Guitar riff), (Drum hit), (Deep bass pulse), (Clock ticking)
 
 **출력 예시:**
 [Intro - Male]
-(Soft acoustic guitar)
+(Soft acoustic guitar, atmospheric)
 가사 내용...
 
 [Verse 1 - Male]
-(Clear vocal, steady beat)
+(Clear vocal, steady beat, articulate delivery)
 가사 내용...
-(Building emotion)
+(Building emotion, maintaining clarity)
 가사 내용...
 """,
         
         "솔로 (여성)": """
-## 보컬 구조 지시사항 (여성 솔로)
+## 보컬 구조 지시사항 (여성 솔로 - Clean & Epic)
 - 모든 파트에 [Verse], [Chorus], [Bridge] 태그 필수
 - 보컬 타입 명시: [Female Vocal], [Female Voice]
-- 감정 변화를 연출 지시어로 표현:
-  * 부드러운: (Soft voice), (Whispering), (Breathy vocal)
-  * 강렬한: (Powerful voice), (Soaring high note), (Belting)
-  * 감성적: (Emotional vocal), (Trembling voice), (Crying tone)
-- Sound FX 활용: (Piano melody), (String swell), (Soft rain), (Wind chimes)
+- 감정 변화를 연출 지시어로 표현 (명료성 우선):
+  * 부드러운: (Soft voice), (Breathy vocal), (Gentle delivery)
+  * 강렬한: (Powerful voice), (Soaring high note), (Clear belting)
+  * 감성적: (Emotional vocal), (Well-enunciated), (Expressive tone)
+- ⚠️ 금지: (Harsh), (Screaming), (Distorted)
+- Sound FX 활용: (Piano melody), (Cinematic strings), (Soft rain), (Wind chimes)
 
 **출력 예시:**
 [Intro - Female]
-(Soft piano intro)
+(Soft piano intro, cinematic atmosphere)
 가사 내용...
 
 [Verse 1 - Female]
-(Breathy vocal, intimate)
+(Breathy vocal, intimate, clear enunciation)
 가사 내용...
-(Building to chorus)
+(Building to chorus, maintaining vocal clarity)
 가사 내용...
 """,
         
@@ -86,7 +89,12 @@ def get_vocal_instruction(vocal_type: str) -> str:
 - **[Chorus - Together/Harmony]:** 두 보컬 화음 위주, 음색 섞이게 구성
 - **[Bridge - Emotional Peak]:** 감정 폭발, Together 또는 Solo 섹션
 
-**3. 교차 허용 시점:**
+**3. Clean & Epic 보컬 지시어:**
+- 남성: (Clear male vocal), (Articulate baritone), (Smooth delivery)
+- 여성: (Clear female vocal), (Crisp soprano), (Well-enunciated)
+- ⚠️ 금지: (Gritty), (Aggressive), (Harsh), (Screaming)
+
+**4. 교차 허용 시점:**
 - Pre-Chorus에서만 짧게 대화
 - Bridge에서 클라이맥스 연출
 - Outro에서 여운
@@ -95,25 +103,25 @@ def get_vocal_instruction(vocal_type: str) -> str:
 
 ```
 [Intro - Instrumental or Solo]
-(Soft piano intro, atmospheric)
+(Cinematic strings, atmospheric)
 (Optional: 한 명이 짧게 시작)
 
 [Verse 1 - Male]
-(Clear male vocal, steady rhythm)
+(Clear male vocal, steady rhythm, articulate)
 남성이 4~8행 이상 부르며 이야기 시작
 음색에 적응할 시간을 충분히 주세요
 청자가 이 보컬에 몰입하도록
 파트를 쪼개지 마세요
 
 [Verse 2 - Female]
-(Soft female vocal, emotional depth)
+(Soft female vocal, emotional depth, clear enunciation)
 여성이 4~8행 이상 부르며 이야기 전개
 남성 파트와는 다른 관점 제시
 역시 충분한 분량으로
 섹션 전체를 전담합니다
 
 [Pre-Chorus - Call & Response]
-(Building tension)
+(Building tension, clean crisp delivery)
 (Male) 짧은 질문 또는 제시
 (Female) 짧은 응답
 (Male) 다시 한 번
@@ -121,24 +129,24 @@ def get_vocal_instruction(vocal_type: str) -> str:
 (Together) 함께 브릿지로
 
 [Chorus - Together/Harmony]
-(Full power, dual harmony, layered vocals)
+(Full power, dual harmony, layered vocals, clear delivery)
 함께 부르는 후렴구
 화음 위주로 구성
 두 음색이 자연스럽게 섞임
 여기서는 개별 태그 대신 Together 사용
 
-[Verse 3 or Bridge - Alternating or Solo]
-(Male leading or Female leading)
+[Bridge - Emotional Peak]
+(Male leading or Female leading, powerful yet clear)
 필요시 한 명이 브릿지 전담
 또는 감정 폭발을 위한 교차
 
 [Chorus - Together/Harmony]
-(Powerful duet, final climax)
+(Powerful duet, final climax, maintaining clarity)
 마지막 후렴구
 두 보컬 최대 시너지
 
 [Outro - Together or Fade]
-(Soft fade out)
+(Soft fade out, gentle ending)
 함께 마무리 또는 한 명이 여운
 ```
 
@@ -148,66 +156,43 @@ def get_vocal_instruction(vocal_type: str) -> str:
 3. **Allow mixing only in Pre-Chorus, Chorus, Bridge, and Outro**
 4. **Verse sections must be dominated by one vocalist**
 5. **Give listeners time to adapt to each vocal tone**
-
-### 나쁜 예시 (절대 금지!)
-```
-❌ [Verse 1]
-(Male) 첫 번째 줄
-(Female) 두 번째 줄  ← 너무 자주 교차!
-(Male) 세 번째 줄
-(Female) 네 번째 줄  ← 몰입 방해!
-```
-
-### 좋은 예시
-```
-✅ [Verse 1 - Male]
-남성이 6~8줄 부르며
-이야기를 온전히 전개
-청자가 음색에 적응
-자연스러운 몰입 유도
-
-✅ [Verse 2 - Female]
-여성이 6~8줄 부르며
-다른 시각 제시
-충분한 시간으로
-감정 전달 완성
-```
+6. **Always use clear, articulate vocal descriptions (Clean & Epic)**
 """,
         
         "합창/콰이어": """
-## 보컬 구조 지시사항 (합창/콰이어)
+## 보컬 구조 지시사항 (합창/콰이어 - Clean & Epic)
 - [Choir], [Chorus Group], [Ensemble] 태그 사용
 - 파트별 성부 구분: [Soprano], [Alto], [Tenor], [Bass]
-- 웅장한 분위기 연출 지시어:
-  * (Full choir), (Layered voices), (Harmony build-up)
-  * (Orchestral backing), (Epic crescendo)
-- 클래식/성가 느낌 강조
+- 웅장한 분위기 연출 지시어 (Clean & Epic):
+  * (Full choir with clear harmony), (Layered voices, well-blended)
+  * (Cinematic orchestral backing), (Epic crescendo with clarity)
+- ⚠️ 종교적 색채 제거: Pipe Organ, Church Choir 대신 Cinematic Strings, Epic Brass 사용
 
 **출력 예시:**
 [Intro - Choir]
-(Soft choir humming, a cappella)
+(Soft choir humming, a cappella, clear harmony)
 Ooh... Aah...
 
 [Verse 1 - Lead + Choir]
-(Lead vocal with choir backing)
+(Lead vocal with choir backing, cinematic atmosphere)
 가사 내용...
-(Choir: Harmony response)
+(Choir: Clear harmony response)
 """,
         
         "AI/로봇 보컬": """
-## 보컬 구조 지시사항 (AI/로봇 보컬)
+## 보컬 구조 지시사항 (AI/로봇 보컬 - Clean & Epic)
 - [Robotic Voice], [Vocoder], [Auto-tuned], [Synthetic Vocal] 태그 사용
-- 기계적 효과 지시어:
-  * (Vocoder effect), (Glitchy vocal), (Digital distortion)
-  * (Auto-tune heavy), (Robotic tone), (Synthesized voice)
+- 기계적 효과 지시어 (명료성 유지):
+  * (Vocoder effect with clear pitch), (Clean digital vocal)
+  * (Auto-tune heavy but articulate), (Synthesized voice, crisp)
 - 사이버펑크/전자음악 분위기
 - Sound FX: (Beep), (Static noise), (Digital glitch), (Circuit sound)
 
 **출력 예시:**
 [Intro - Robotic]
-(Heavy vocoder, glitchy)
+(Heavy vocoder, clean digital processing)
 가사 내용...
-(Digital distortion)
+(Digital distortion, maintaining clarity)
 """,
     }
     
@@ -278,20 +263,21 @@ def parse_title_and_lyrics(response: str) -> tuple[str, str, str]:
 def render(client):
     """가사 생성 탭을 렌더링합니다."""
     
-    st.header("🎵 Step 1: Suno/Udio 최적화 가사 생성기")
+    st.header("🎵 Step 1: Suno/Udio 최적화 가사 생성기 (Clean & Epic)")
     st.markdown("""
     **AI 음악 생성 툴에 최적화된 가사**를 만듭니다.
     
-    > 🎼 *"구조적 태그 + 보컬 지시어 + Sound FX = 완벽한 AI 음악"*
+    > 🎼 *"구조적 태그 + Clean 보컬 + Epic 사운드 = 완벽한 AI 음악"*
     """)
     
     st.info("""
-    ✨ **Suno/Udio 최적화 기능:**
+    ✨ **Suno/Udio 최적화 기능 (Clean & Epic):**
     - 🎤 **보컬 타입별 맞춤 구조** (솔로, 듀엣, 합창 등)
     - 🏷️ **구조적 태그 자동 삽입** ([Intro], [Verse], [Chorus])
-    - 🎭 **연출 지시어 포함** ((Whisper), (Build up), (Guitar solo))
-    - 🔊 **Sound FX 추가** ((Clock ticking), (Rain falling))
+    - 🎭 **명료한 연출 지시어** ((Clear vocal), (Cinematic strings))
+    - 🔊 **세련된 Sound FX** ((Deep bass pulse), (Epic brass hits))
     - 🛠️ **가사 깎기 기능** (외부에서 수정한 가사 포맷팅)
+    - 🎬 **Clean & Epic 철학** (웅장하되 명료하게, 종교적 색채 제거)
     """)
     
     st.divider()
@@ -413,87 +399,103 @@ def render(client):
         # 보컬 타입별 지시문 가져오기
         vocal_instruction = get_vocal_instruction(vocal_type)
         
-        # ============ ⭐ Vibe 기반 모드 트리거 (핵심!) ⭐ ============
+        # ============ ⭐ Vibe 기반 모드 트리거 (Clean & Epic 버전) ⭐ ============
         mode_trigger = ""
         mode_examples = ""
         
         if selected_vibe_name in ["웃기지만 진지하게 (Satire)", "슬픈데 신나게 (Paradox)"]:
             mode_trigger = """
-## ⚠️ 🌟 [모드 2: 공감과 반전의 엔터테이닝 모드] 강력 발동! ⚠️
+## ⚠️ 🌟 [모드 2: 공감과 반전의 엔터테이닝 모드] 강력 발동! (Clean & Epic 버전) ⚠️
 
 **당신의 임무: 시청자가 "와, 이거 내 얘기네!"라며 무릎을 탁 치게 만들기**
 
-### 핵심 원칙:
-1. **사소한 것을 장엄하게** - 치킨, 배달, 배터리, 재난문자 → 오페라/교회 성가대/디즈니 스타일로
-2. **스케일의 부조화** - 핸드폰 1% → 아포칼립스급 비극 / 배달 음식 → 종교적 경건함
-3. **극단적 대비** - 디즈니 멜로디 + 직장인 고통 가사
+### 핵심 원칙 (Clean & Epic):
+1. **사소한 것을 영화적으로 장엄하게** - 치킨, 배달, 배터리, 재난문자 → 시네마틱하게
+2. **스케일의 부조화** - 핸드폰 1% → 영화 OST급 비극 / 배달 음식 → 영웅의 귀환
+3. **극단적 대비** - 밝은 멜로디 + 현실 고통 가사
 4. **100% 진지하게** - 억지 유머 금지! 진지할수록 더 웃김!
 
-### 연출 지시어 필수:
-- [Intro - Grand Pipe Organ & Church Choir] 또는 [Intro - Disney-style Cheerful Piano]
-- [Chorus - Explosive Heavy Metal] 또는 [Chorus - Gregorian Chant]
+### ⚠️ Clean & Epic 필수 규칙:
+- **보컬**: `Clear rap flow`, `Articulate delivery`, `Crisp vocal` - 명료성 최우선
+- **악기**: `Cinematic Strings`, `Epic Brass Hits`, `Deep Sub-bass` - 영화적 웅장함
+- **절대 금지**: `Pipe Organ`, `Church Choir`, `Gritty vocal`, `Shouting`
+
+### 연출 지시어 (Clean & Epic 버전):
+- [Intro - Cinematic Strings & Deep Sub-bass] 또는 [Intro - Bright Acoustic Guitar]
+- [Chorus - Epic Brass Hits with Clear Vocal] 또는 [Chorus - Modern Trap Beat]
 - 구체적 디테일: "부산 앞바다 파고", "1% 배터리 경고", "양념 반 후라이드 반"
 
-### 'Aha!' 예시 참고:
-- 핸드폰 배터리 → 세상의 종말
-- 월요일 출근 → 십자가를 지는 골고다 언덕
-- 배달 음식 → 천사의 나팔 소리, 구원자
-- 재난문자 → 그리스 비극
+### 'Aha!' 대표 예시: 500km의 사이렌
+- ✅ 웅장하지만 명료한 랩 (Clear rap, not gritty)
+- ✅ 시네마틱 악기 (Cinematic Strings, not Pipe Organ)
+- ✅ 영화적 웅장함 (Epic Brass, Deep Sub-bass)
+- ✅ 사소한 것(재난문자)을 장엄하게, 하지만 세련되게
 
-**절대 규칙: 웃기려고 쓰지 말고, 비장하고 장엄하게 쓰세요!**
+**절대 규칙: 웅장하되 명료하게! 영화 OST처럼, 성가대처럼 쓰지 마세요!**
 """
             mode_examples = """
 
-## 🎬 엔터테이닝 모드 출력 예시 (반드시 참고!)
+## 🎬 엔터테이닝 모드 출력 예시 (Clean & Epic 표준)
 
-**예시 1: 핸드폰 배터리의 비극**
+**대표 예시: 500km의 사이렌: 03:00 AM**
 ```
 [제목]
-1%의 아포칼립스
+500km의 사이렌: 03:00 AM
 
-[Intro - Grand Pipe Organ & Church Choir]
-(세상의 종말을 알리는 웅장함)
-하늘이 무너지고 땅이 갈라지는 비명
-온 세상이 어둠에 잠기는 순간
-(Thunder crash, dramatic strings)
+[Intro - Cinematic Strings & Deep Sub-bass]
+(Epic film score atmosphere, modern production)
+(Clock ticking sound effect at 3 AM)
 
-[Verse 1 - Operatic Male Vocal]
-(Dramatic, desperate)
-그것은... 내 핸드폰의 1% 배터리 경고
-충전기 없는 이 카페에서
-나는 무력한 영혼, 끊어진 연결
-세상과의 마지막 끈이 사라지네
-(String tremolo, building tension)
+[Verse 1 - Clear Male Rap, Articulate Mid-range]
+(Clean delivery, crisp enunciation)
+새벽 세 시, 서울 빌딩 숲 속
+내 방 한 칸의 평화가 깨지는 순간
+(Deep bass pulse)
+핸드폰 화면 속 경고음이 울리네
+부산 앞바다 파고 3미터라는데
+
+[Pre-Chorus - Building Tension]
+(Trap hi-hats enter, clean crisp rhythm)
+재난문자여, 재난문자여
+왜 너는 지역 구분을 못 하는가
+
+[Chorus - Epic Brass Hits with Clear Vocal]
+(Full cinematic power, articulate delivery)
+500킬로미터를 건너
+나의 새벽 3시를 침략하는
+이 부조리한 시스템이여
 ```
 
-**예시 2: 월요일 아침의 아이러니**
+**포인트:**
+- ✅ Clear rap flow (가사 또박또박 들림)
+- ✅ Cinematic Strings & Epic Brass (종교적 색채 없이 영화적)
+- ✅ Deep Sub-bass (현대적 웅장함)
+- ✅ 사소한 재난문자 → 영화급 서사
+
+**추가 예시: 배달의 기적 (Clean & Epic 버전)**
 ```
-[제목]
-월요일의 십자가
+[Intro - Cinematic Orchestral Build-up]
+(Epic film score strings, anticipation)
 
-[Intro - Acoustic Guitar - Bright and Happy]
-(Cheerful strumming, birds chirping)
-랄라라~ 라라라~
+그가 오신다
+60분을 기다린 끝에
+(Timpani rolls, modern production)
 
-[Verse 1 - Female Vocal, Sweet and Optimistic]
-(Disney princess style)
-새들이 노래하고 꽃들이 미소 짓는
-아름다운 월요일 아침~
-(Suddenly dark undertone)
-하지만 내 몸은 침대에 박힌 젖은 솜뭉치
+[Verse 1 - Clear Baritone Vocal, Articulate]
+(Smooth delivery, well-enunciated)
+저 멀리서 들려오는
+오토바이 배기음 소리가
+영화 속 영웅의 테마곡처럼 귀를 울리네
 
-[Chorus - Contrast building]
-(Music stays cheerful, vocals desperate)
-알람 소리는 지옥의 나팔 소리
-출근길은 십자가를 지는 골고다 언덕
-(Ironic "La la la~" harmony)
-랄라라~ 또 월요일~
+[Chorus - Epic Brass & Modern Beat]
+(Cinematic crescendo, clear vocal delivery)
+오오~ 양념 반 후라이드 반의 구원이여!
 ```
 """
         
         else:
             mode_trigger = """
-## ⚠️ [모드 1: 진솔한 서사 모드] 사용 ⚠️
+## ⚠️ [모드 1: 진솔한 서사 모드] 사용 (Clean & Epic 적용) ⚠️
 
 **당신의 임무: 깊은 울림을 주는 진정성 있는 가사 작성**
 
@@ -503,9 +505,14 @@ def render(client):
 3. **억지 유머 없이** - 진솔하고 가슴 시린 고백
 4. **점층적 고조** - 감정이 자연스럽게 쌓여가도록
 
+### ⚠️ Clean & Epic 필수 규칙:
+- **보컬**: `Clear emotional vocal`, `Smooth delivery`, `Well-enunciated`
+- **악기**: 장르 특성 살리되, 명료성 유지
+- **웅장함 필요 시**: `Cinematic Strings`, `Orchestral arrangement` (종교적 색채 제거)
+
 ### 연출 지시어:
 - [Intro - Soft piano intro, atmospheric]
-- [Chorus - Full band, emotional peak]
+- [Chorus - Full band, emotional peak, clear vocal]
 - 계절과 자연의 비유 (벚꽃, 눈, 비)
 - 섬세한 감정 묘사
 
@@ -528,7 +535,7 @@ def render(client):
 
 {vocal_instruction}
 
-## ⚠️ Suno/Udio 최적화 필수 요구사항 ⚠️
+## ⚠️ Suno/Udio 최적화 필수 요구사항 (Clean & Epic) ⚠️
 
 1. **구조적 태그 필수**:
    - [Intro], [Verse 1], [Pre-Chorus], [Chorus], [Verse 2], [Bridge], [Outro]
@@ -541,58 +548,63 @@ def render(client):
    - ✅ Chorus는 Together/Harmony 위주
    - **Do not alternate lines frequently within sections!**
 
-3. **연출 지시어 필수**:
+3. **연출 지시어 필수 (Clean & Epic)**:
    - 가사 줄 사이에 괄호로 음악적 연출 삽입
-   - 예: (Piano intro), (Build up), (Vocal emphasis), (Fade out)
+   - 예: (Cinematic strings intro), (Clear vocal), (Epic brass hits), (Fade out)
+   - **보컬**: Clear, Crisp, Articulate, Smooth 등 명료성 강조
+   - **악기**: Cinematic Strings, Epic Brass, Deep Sub-bass 등 영화적 웅장함
 
 4. **Sound FX 활용**:
    - 분위기에 맞는 효과음 지시어 추가
-   - 예: (Clock ticking), (Rain falling), (Gunshot), (Thunder)
+   - 예: (Clock ticking), (Rain falling), (Thunder), (Deep bass pulse)
 
-5. **Mureka & Suno 스타일 태그 생성**:
-   - Mureka V7.6 Pro: 악기, 장르, 보컬, BPM, 분위기
-   - Suno AI: 5단계 문장형 프롬프트 (Identity → Mood → Instruments → Performance → Production)
+5. **Mureka & Suno 스타일 태그 생성 (Clean & Epic)**:
+   - Mureka V7.6 Pro: 악기, 장르, 보컬(Clear/Crisp 명시), BPM, 분위기
+   - Suno AI: 5단계 문장형 프롬프트
+     * Performance 단계: 명료성 강조 (clear, articulate, crisp, avoiding gritty/aggressive)
+     * Production 단계: 품질 키워드 필수 (high-definition, spacious, polished, clear lyric delivery)
 
 {mode_examples}
 
-## 출력 형식 (Suno/Udio 최적화)
+## 출력 형식 (Suno/Udio 최적화 - Clean & Epic)
 
 [제목]
 (주제와 장르에 어울리는 제목)
 
 [가사]
 [Intro]
-(연출 지시어)
+(Clean & Epic 연출 지시어)
 가사 내용...
 
 [Verse 1]
-(연출 지시어)
+(Clear vocal, articulate delivery)
 가사 내용...
 (감정 변화 지시어)
 가사 내용...
 
 [Pre-Chorus]
-(Build up)
+(Build up, clean rhythm)
 가사 내용...
 
 [Chorus]
-(Full power, hook line)
+(Epic power, clear hook line)
 가사 내용...
 
 ... (계속)
 
 ---
-💡 **Mureka V7.6 Pro 스타일 태그:**
-`[악기], [장르], [보컬], [BPM], [분위기]`
+💡 **Mureka V7.6 Pro 스타일 태그 (Clean & Epic):**
+`[시네마틱 악기], [장르], [Clear/Crisp 보컬], [BPM], [분위기]`
+예: `Cinematic Strings, Deep Sub-bass, Epic Brass Hits, Modern Hip-Hop, Clear Articulate Male Vocal, 85BPM, Epic yet Clean, Film Score Vibe`
 
 ---
-💡 **Suno 최적화 프롬프트 (5단계 문장형 - Copy & Paste):**
+💡 **Suno 최적화 프롬프트 (5단계 문장형 - Clean & Epic):**
 (5단계 공식에 따라 하나의 영어 문단으로 작성)
-A [Gender] vocalist sings over a [Genre] piece. It features a [Tempo] and a [Mood], set in a [Key]. The [Instrument1] plays [Style1], while the [Instrument2] provides [Role2]. The vocals are delivered in a [Range/Texture] with [Technique]. The production is [Mix Style], featuring [Effects] and a [Structure].
+A [Gender] vocalist sings over a [Genre] piece with [cinematic/modern] elements. It features a [Tempo] and an [epic yet clean Mood], set in a [Key]. The [Cinematic Instrument] plays [Sharp/Clean Style], while the [Deep Bass] provides a [clean foundation]. The vocals are delivered in a [clear/articulate Range] with [smooth technique], avoiding any [gritty/aggressive] qualities. The production is [high-definition/spacious], featuring [clear mixing] with emphasis on [clear lyric delivery], and follows a [Structure].
 
-지금 바로 Suno/Udio에서 최상의 결과를 낼 수 있는 가사를 작성해주세요!"""
+지금 바로 Clean & Epic 원칙에 따라 Suno/Udio에서 최상의 결과를 낼 수 있는 가사를 작성해주세요!"""
 
-        with st.spinner(f"🎼 '{final_genre}' / '{vocal_type}' 가사 생성 중..."):
+        with st.spinner(f"🎼 '{final_genre}' / '{vocal_type}' 가사 생성 중... (Clean & Epic 적용)"):
             try:
                 response = get_gpt_response(client, SYSTEM_ROLE, user_prompt)
                 
@@ -611,7 +623,7 @@ A [Gender] vocalist sings over a [Genre] piece. It features a [Tempo] and a [Moo
                 st.session_state["lyrics_vibe"] = selected_vibe_name
                 st.session_state["lyrics_vocal_type"] = vocal_type  # 보컬 타입 저장
                 
-                st.success("🎉 Suno/Udio 최적화 가사가 완성되었습니다!")
+                st.success("🎉 Clean & Epic 가사가 완성되었습니다!")
                 st.rerun()
                 
             except Exception as e:
@@ -685,7 +697,7 @@ A [Gender] vocalist sings over a [Genre] piece. It features a [Tempo] and a [Moo
         # Mureka 태그 표시
         if st.session_state.get("mureka_style_tag"):
             st.divider()
-            st.success("🎵 **Mureka V7.6 Pro 전용 스타일 태그**")
+            st.success("🎵 **Mureka V7.6 Pro 전용 스타일 태그 (Clean & Epic)**")
             
             mureka_tag_display = st.session_state["mureka_style_tag"]
             st.code(mureka_tag_display, language=None)
@@ -714,7 +726,7 @@ A [Gender] vocalist sings over a [Genre] piece. It features a [Tempo] and a [Moo
         # Suno 프롬프트 표시
         if suno_tags:
             st.divider()
-            st.info("🎵 **Suno 최적화 프롬프트 (Copy & Paste)**")
+            st.info("🎵 **Suno 최적화 프롬프트 (Copy & Paste - Clean & Epic)**")
             
             # Suno 프롬프트 추출 (마크다운 제거)
             suno_prompt_text = suno_tags.replace("💡 **Suno 최적화 프롬프트 (Copy & Paste):**", "").replace("💡 Suno", "").strip()
@@ -761,40 +773,43 @@ A [Gender] vocalist sings over a [Genre] piece. It features a [Tempo] and a [Moo
                     # 현재 보컬 타입 가져오기
                     current_vocal_type = st.session_state.get("lyrics_vocal_type", "솔로 (남성)")
                     
-                    # 장르 변경 프롬프트
+                    # 장르 변경 프롬프트 (Clean & Epic)
                     style_change_prompt = f"""다음 가사의 장르를 **{new_genre}**로 변경하고, Vibe는 **{new_vibe}**로 설정해주세요.
 
 ## 기존 가사 (내용은 절대 변경하지 말 것!)
 {main_lyrics}
 
-## 요구사항
+## 요구사항 (Clean & Epic 원칙 적용)
 1. **가사 내용과 구조는 100% 유지**
-2. **장르에 맞는 Mureka V7.6 Pro 스타일 태그 생성**:
-   - {new_genre}에 어울리는 악기 조합
+
+2. **Clean & Epic 원칙에 따른 Mureka V7.6 Pro 스타일 태그 생성**:
+   - {new_genre}에 어울리는 악기 조합 (시네마틱 악기 우선)
+   - 보컬: Clear, Crisp, Articulate 등 명료성 강조
    - 적절한 BPM
    - 장르 특성에 맞는 분위기 키워드
-   
-3. **장르에 맞는 Suno 5단계 프롬프트 생성**:
+   - ⚠️ 금지: Pipe Organ, Church Choir, Gritty, Aggressive
+
+3. **Clean & Epic 원칙에 따른 Suno 5단계 프롬프트 생성**:
    - Identity: {new_genre} 장르로 명시
-   - Mood: {new_vibe}에 맞는 분위기
-   - Instruments: {new_genre}의 특징적인 악기 연주 방식
-   - Performance: {new_genre}에 어울리는 보컬 스타일
-   - Production: {new_genre}의 프로덕션 특성
+   - Mood: {new_vibe}에 맞는 분위기 (epic yet clean)
+   - Instruments: {new_genre}의 특징적인 악기 연주 방식 (Cinematic Strings, Epic Brass 등)
+   - Performance: {new_genre}에 어울리는 보컬 스타일 (clear, articulate, avoiding gritty/aggressive 명시)
+   - Production: 품질 키워드 필수 (high-definition, spacious, polished, clear lyric delivery)
 
 ## 출력 형식
 가사는 절대 출력하지 말고, 아래 두 가지만 출력하세요:
 
 ---
-💡 **Mureka V7.6 Pro 스타일 태그:**
-`[악기], [장르], [보컬], [BPM], [분위기]`
+💡 **Mureka V7.6 Pro 스타일 태그 (Clean & Epic):**
+`[시네마틱 악기], [장르], [Clear 보컬], [BPM], [분위기]`
 
 ---
-💡 **Suno 최적화 프롬프트 (5단계 문장형):**
-(5단계 공식에 따라 하나의 영어 문단으로 작성)
+💡 **Suno 최적화 프롬프트 (5단계 문장형 - Clean & Epic):**
+(5단계 공식에 따라 하나의 영어 문단으로 작성, Performance와 Production 단계에 명료성 키워드 필수)
 
-지금 바로 위 형식으로 스타일 태그만 생성해주세요!"""
+지금 바로 위 형식으로 Clean & Epic 스타일 태그만 생성해주세요!"""
 
-                    with st.spinner(f"🎨 {new_genre} 스타일 태그 생성 중..."):
+                    with st.spinner(f"🎨 {new_genre} 스타일 태그 생성 중... (Clean & Epic)"):
                         try:
                             style_response = get_gpt_response(client, SYSTEM_ROLE, style_change_prompt)
                             
@@ -817,13 +832,13 @@ A [Gender] vocalist sings over a [Genre] piece. It features a [Tempo] and a [Moo
                             st.session_state["lyrics_genre"] = new_genre
                             st.session_state["lyrics_vibe"] = new_vibe
                             
-                            st.success(f"🎉 {new_genre} 스타일로 변경되었습니다!")
+                            st.success(f"🎉 {new_genre} 스타일로 변경되었습니다! (Clean & Epic 적용)")
                             
                             # 결과 표시
-                            st.markdown("**🎵 새로운 Mureka 태그:**")
+                            st.markdown("**🎵 새로운 Mureka 태그 (Clean & Epic):**")
                             st.code(new_mureka_tag, language=None)
                             
-                            st.markdown("**🎵 새로운 Suno 프롬프트:**")
+                            st.markdown("**🎵 새로운 Suno 프롬프트 (Clean & Epic):**")
                             # Suno 프롬프트 추출
                             suno_start = style_response.find("Suno")
                             if suno_start != -1:
@@ -875,10 +890,10 @@ A [Gender] vocalist sings over a [Genre] piece. It features a [Tempo] and a [Moo
                     current_vocal_type = st.session_state.get("lyrics_vocal_type", "솔로 (남성)")
                     vocal_instruction = get_vocal_instruction(current_vocal_type)
                     
-                    # ============ Revision Mode Prompt ============
+                    # ============ Revision Mode Prompt (Clean & Epic) ============
                     if is_full_lyrics:
                         # 포맷팅 모드: 내용 유지, 태그만 추가
-                        refinement_prompt = f"""다음은 사용자가 작성한 완성된 가사입니다. 내용을 절대 변경하지 말고, **Suno/Udio 최적화 태그만 추가**해주세요.
+                        refinement_prompt = f"""다음은 사용자가 작성한 완성된 가사입니다. 내용을 절대 변경하지 말고, **Suno/Udio 최적화 태그만 추가**해주세요. (Clean & Epic 원칙 적용)
 
 ## 사용자 가사
 {revision_input}
@@ -891,29 +906,33 @@ A [Gender] vocalist sings over a [Genre] piece. It features a [Tempo] and a [Moo
 ## 작업 지시사항 (매우 중요!)
 1. **가사 내용은 절대 변경하지 마세요** - 원문 그대로 유지!
 2. 각 파트 앞에 구조 태그 추가: [Intro], [Verse], [Chorus] 등
-3. 적절한 위치에 연출 지시어 삽입: (Piano intro), (Build up) 등
+3. 적절한 위치에 연출 지시어 삽입: (Cinematic strings intro), (Clear vocal), (Epic brass hits)
 4. 보컬 타입에 맞는 화자 태그 추가
 5. **듀엣인 경우**: 블록 단위로 [Male]/[Female] 배정, 잦은 교차 금지!
-6. Mureka 스타일 태그와 Suno 스타일 태그 생성
+6. **Clean & Epic 원칙** 적용:
+   - 보컬: Clear, Crisp, Articulate 등
+   - 악기: Cinematic Strings, Epic Brass, Deep Sub-bass 등
+   - 금지: Pipe Organ, Church Choir, Gritty, Aggressive
+7. Mureka 스타일 태그와 Suno 스타일 태그 생성 (Clean & Epic 버전)
 
 ## 출력 형식
 [제목]
 (기존 제목 또는 적절한 제목)
 
 [가사]
-(구조 태그와 연출 지시어가 추가된 가사)
+(구조 태그와 Clean & Epic 연출 지시어가 추가된 가사)
 
 ---
-💡 **Mureka V7.6 Pro 스타일 태그:**
+💡 **Mureka V7.6 Pro 스타일 태그 (Clean & Epic):**
 `...`
 
 ---
-💡 **Suno 최적화 프롬프트 (5단계 문장형):**
-(5단계 공식에 따라 하나의 영어 문단으로 작성)
+💡 **Suno 최적화 프롬프트 (5단계 문장형 - Clean & Epic):**
+(5단계 공식에 따라 하나의 영어 문단으로 작성, 명료성 키워드 필수)
 """
                     else:
                         # 재작성 모드: 요청사항 반영하여 재작성
-                        refinement_prompt = f"""다음은 기존 가사와 사용자의 수정 요청입니다. 요청사항을 반영하여 가사를 **재작성**해주세요.
+                        refinement_prompt = f"""다음은 기존 가사와 사용자의 수정 요청입니다. 요청사항을 반영하여 가사를 **재작성**해주세요. (Clean & Epic 원칙 적용)
 
 ## 기존 가사
 {main_lyrics}
@@ -929,26 +948,26 @@ A [Gender] vocalist sings over a [Genre] piece. It features a [Tempo] and a [Moo
 ## 작업 지시사항
 1. 사용자의 수정 요청을 최대한 반영
 2. 기존 가사의 핵심 메시지는 유지하되 표현 개선
-3. 구조 태그와 연출 지시어 포함
-4. Mureka & Suno 스타일 태그 생성
+3. 구조 태그와 연출 지시어 포함 (Clean & Epic)
+4. Mureka & Suno 스타일 태그 생성 (Clean & Epic 버전)
 
 ## 출력 형식
 [제목]
 (수정된 제목)
 
 [가사]
-(수정사항이 반영된 가사)
+(수정사항이 반영된 가사 with Clean & Epic 연출)
 
 ---
-💡 **Mureka V7.6 Pro 스타일 태그:**
+💡 **Mureka V7.6 Pro 스타일 태그 (Clean & Epic):**
 `...`
 
 ---
-💡 **Suno 최적화 프롬프트 (5단계 문장형):**
-(5단계 공식에 따라 하나의 영어 문단으로 작성)
+💡 **Suno 최적화 프롬프트 (5단계 문장형 - Clean & Epic):**
+(5단계 공식에 따라 하나의 영어 문단으로 작성, 명료성 키워드 필수)
 """
                     
-                    with st.spinner("🛠️ 가사를 수정하고 있습니다..."):
+                    with st.spinner("🛠️ 가사를 수정하고 있습니다... (Clean & Epic 적용)"):
                         try:
                             revised_response = get_gpt_response(client, SYSTEM_ROLE, refinement_prompt)
                             
@@ -961,7 +980,7 @@ A [Gender] vocalist sings over a [Genre] piece. It features a [Tempo] and a [Moo
                             st.session_state["lyrics"] = revised_response
                             st.session_state["mureka_style_tag"] = revised_mureka
                             
-                            st.success("✅ 가사가 수정되었습니다!")
+                            st.success("✅ Clean & Epic 가사가 수정되었습니다!")
                             st.rerun()
                             
                         except Exception as e:
@@ -1002,12 +1021,16 @@ A [Gender] vocalist sings over a [Genre] piece. It features a [Tempo] and a [Moo
     else:
         st.markdown("---")
         st.markdown("""
-        ### 🚀 시작하기
+        ### 🚀 시작하기 (Clean & Epic)
         
         1. **주제 입력** - 짧은 한 줄이든 긴 이야기든 OK!
         2. **장르 & 보컬 타입 선택** - 듀엣을 선택하면 화자가 자동으로 구분됩니다
         3. **Vibe 선택** - 정석, 반전, 역설, 광기 중 선택
-        4. **생성 버튼 클릭** - Suno/Udio 최적화 가사 완성!
+        4. **생성 버튼 클릭** - Clean & Epic 가사 완성!
         
-        > 💡 구조 태그 + 연출 지시어 + Sound FX가 자동으로 포함됩니다!
+        > 🎬 **Clean & Epic 철학**: 웅장하되 명료하게, 영화 OST처럼 세련되게!
+        > 
+        > - ✅ Clear, Crisp, Articulate 보컬
+        > - ✅ Cinematic Strings, Epic Brass, Deep Sub-bass
+        > - ❌ Pipe Organ, Church Choir, Gritty, Shouting
         """)
